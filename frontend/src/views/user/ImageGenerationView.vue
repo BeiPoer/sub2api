@@ -890,6 +890,7 @@ const HISTORY_DB_NAME = 'sub2api-image-generation'
 const HISTORY_DB_VERSION = 1
 const HISTORY_DB_STORE = 'history'
 const ADVANCED_SETTINGS_CACHE_KEY = 'sub2api:image-generation-advanced-settings'
+const SELECTED_KEY_CACHE_KEY = 'sub2api:image-generation-selected-key'
 const HISTORY_LIMIT = 10
 const FIXED_PARTIAL_IMAGES = 0
 const DEFAULT_RESPONSE_MODEL = 'gpt-5.5'
@@ -1206,7 +1207,8 @@ watch([selectedKeyId, mode, prompt, responseModel, model, size, customSizeWidth,
   activeHistoryId.value = ''
 })
 
-watch(selectedKeyId, () => {
+watch(selectedKeyId, (value) => {
+  persistSelectedKeyId(value)
   void loadModelsForSelectedKey()
 })
 
@@ -1251,13 +1253,19 @@ async function loadEligibleKeys() {
       key.group?.subscription_type === 'standard',
     )
 
-    if (selectedKeyId.value && eligibleKeys.value.some((key) => key.id === selectedKeyId.value)) {
+    if (selectedKeyId.value !== null && eligibleKeys.value.some((key) => key.id === selectedKeyId.value)) {
+      persistSelectedKeyId(selectedKeyId.value)
       await loadModelsForSelectedKey()
       return
     }
 
-    const nextKeyId = eligibleKeys.value[0]?.id ?? null
+    const cachedKeyId = readCachedSelectedKeyId()
+    const cachedKeyAvailable = cachedKeyId !== null && eligibleKeys.value.some((key) => key.id === cachedKeyId)
+    const nextKeyId = cachedKeyAvailable
+      ? cachedKeyId
+      : eligibleKeys.value[0]?.id ?? null
     if (selectedKeyId.value === nextKeyId) {
+      persistSelectedKeyId(nextKeyId)
       await loadModelsForSelectedKey()
     } else {
       selectedKeyId.value = nextKeyId
@@ -1270,6 +1278,27 @@ async function loadEligibleKeys() {
     appStore.showError(extractApiErrorMessage(error, t('imageGeneration.errors.loadKeysFailed')))
   } finally {
     loadingKeys.value = false
+  }
+}
+
+function readCachedSelectedKeyId(): number | null {
+  const raw = localStorage.getItem(SELECTED_KEY_CACHE_KEY)
+  if (!raw) return null
+  const value = Number(raw)
+  if (!Number.isSafeInteger(value)) {
+    localStorage.removeItem(SELECTED_KEY_CACHE_KEY)
+    return null
+  }
+  return value
+}
+
+function persistSelectedKeyId(value: number | null) {
+  if (typeof value === 'number' && eligibleKeys.value.some((key) => key.id === value)) {
+    localStorage.setItem(SELECTED_KEY_CACHE_KEY, String(value))
+    return
+  }
+  if (value === null) {
+    localStorage.removeItem(SELECTED_KEY_CACHE_KEY)
   }
 }
 

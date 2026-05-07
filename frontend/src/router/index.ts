@@ -184,18 +184,6 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
-    path: '/image-generation',
-    name: 'ImageGeneration',
-    component: () => import('@/views/user/ImageGenerationView.vue'),
-    meta: {
-      requiresAuth: true,
-      requiresAdmin: false,
-      title: 'AI Image Generation',
-      titleKey: 'imageGeneration.title',
-      descriptionKey: 'imageGeneration.description'
-    }
-  },
-  {
     path: '/usage',
     name: 'Usage',
     component: () => import('@/views/user/UsageView.vue'),

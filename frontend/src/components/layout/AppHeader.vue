@@ -128,7 +128,7 @@
 
                 <a
                   v-if="authStore.isAdmin"
-                  href="https://github.com/astorm-z/sub2api"
+                  href="https://github.com/BeiPoer/sub2api"
                   target="_blank"
                   rel="noopener noreferrer"
                   @click="closeDropdown"

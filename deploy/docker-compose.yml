@@ -16,7 +16,7 @@ services:
   # Sub2API Application
   # ===========================================================================
   sub2api:
-    image: ${SUB2API_IMAGE:-ghcr.io/astorm-z/sub2api:main}
+    image: ${SUB2API_IMAGE:-ghcr.io/beipoer/sub2api:main}
     container_name: sub2api
     restart: unless-stopped
     ulimits:

@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"mime"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
@@ -364,6 +365,141 @@ func TestOpenAIGatewayServiceParseOpenAIImagesRequest_JSONEditURLs(t *testing.T)
 	require.Equal(t, 2, *parsed.PartialImages)
 	require.True(t, parsed.HasMask)
 	require.Equal(t, OpenAIImagesCapabilityNative, parsed.RequiredCapability)
+}
+
+func TestRewriteOpenAIImagesAPIKeyRequest_JSONResponseFormatPolicy(t *testing.T) {
+	tests := []struct {
+		name           string
+		body           []byte
+		responseFormat string
+		wantFormat     string
+	}{
+		{
+			name:           "omitted response format defaults to url",
+			body:           []byte(`{"model":"gpt-image-2","prompt":"draw a cat"}`),
+			responseFormat: "",
+			wantFormat:     "url",
+		},
+		{
+			name:           "b64 json is preserved",
+			body:           []byte(`{"model":"gpt-image-2","prompt":"draw a cat","response_format":"b64_json"}`),
+			responseFormat: "b64_json",
+			wantFormat:     "b64_json",
+		},
+		{
+			name:           "normalized b64 json is not overwritten",
+			body:           []byte(`{"model":"gpt-image-2","prompt":"draw a cat","response_format":" B64_JSON "}`),
+			responseFormat: "b64_json",
+			wantFormat:     " B64_JSON ",
+		},
+		{
+			name:           "url stays url",
+			body:           []byte(`{"model":"gpt-image-2","prompt":"draw a cat","response_format":"url"}`),
+			responseFormat: "url",
+			wantFormat:     "url",
+		},
+		{
+			name:           "empty response format is overwritten",
+			body:           []byte(`{"model":"gpt-image-2","prompt":"draw a cat","response_format":""}`),
+			responseFormat: "",
+			wantFormat:     "url",
+		},
+		{
+			name:           "unknown response format is overwritten",
+			body:           []byte(`{"model":"gpt-image-2","prompt":"draw a cat","response_format":"foo"}`),
+			responseFormat: "foo",
+			wantFormat:     "url",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rewritten, contentType, err := rewriteOpenAIImagesAPIKeyRequest(tt.body, "application/json", "gpt-image-upstream", &OpenAIImagesRequest{
+				ResponseFormat: tt.responseFormat,
+			})
+			require.NoError(t, err)
+			require.Equal(t, "application/json", contentType)
+			require.Equal(t, "gpt-image-upstream", gjson.GetBytes(rewritten, "model").String())
+			require.Equal(t, tt.wantFormat, gjson.GetBytes(rewritten, "response_format").String())
+		})
+	}
+}
+
+func TestRewriteOpenAIImagesAPIKeyRequest_MultipartResponseFormatPolicy(t *testing.T) {
+	tests := []struct {
+		name           string
+		fields         [][2]string
+		responseFormat string
+		wantFormats    []string
+	}{
+		{
+			name:           "omitted response format defaults to url",
+			fields:         [][2]string{{"model", "gpt-image-2"}, {"prompt", "replace background"}},
+			responseFormat: "",
+			wantFormats:    []string{"url"},
+		},
+		{
+			name:           "b64 json is preserved",
+			fields:         [][2]string{{"model", "gpt-image-2"}, {"prompt", "replace background"}, {"response_format", "b64_json"}},
+			responseFormat: "b64_json",
+			wantFormats:    []string{"b64_json"},
+		},
+		{
+			name:           "normalized b64 json is not overwritten",
+			fields:         [][2]string{{"model", "gpt-image-2"}, {"prompt", "replace background"}, {"response_format", " B64_JSON "}},
+			responseFormat: "b64_json",
+			wantFormats:    []string{" B64_JSON "},
+		},
+		{
+			name:           "unknown response formats are replaced with one url field",
+			fields:         [][2]string{{"model", "gpt-image-2"}, {"prompt", "replace background"}, {"response_format", "foo"}, {"response_format", "bar"}},
+			responseFormat: "bar",
+			wantFormats:    []string{"url"},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			body, contentType := buildOpenAIImagesMultipartTestBody(t, tt.fields)
+			rewritten, rewrittenContentType, err := rewriteOpenAIImagesAPIKeyRequest(body, contentType, "gpt-image-upstream", &OpenAIImagesRequest{
+				ResponseFormat: tt.responseFormat,
+			})
+			require.NoError(t, err)
+			require.Contains(t, rewrittenContentType, "multipart/form-data")
+
+			form := parseOpenAIImagesMultipartTestForm(t, rewritten, rewrittenContentType)
+			require.Equal(t, []string{"gpt-image-upstream"}, form.Value["model"])
+			require.Equal(t, tt.wantFormats, form.Value["response_format"])
+			require.Len(t, form.File["image"], 1)
+		})
+	}
+}
+
+func buildOpenAIImagesMultipartTestBody(t *testing.T, fields [][2]string) ([]byte, string) {
+	t.Helper()
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+	for _, field := range fields {
+		require.NoError(t, writer.WriteField(field[0], field[1]))
+	}
+	part, err := writer.CreateFormFile("image", "source.png")
+	require.NoError(t, err)
+	_, err = part.Write([]byte("png-image-content"))
+	require.NoError(t, err)
+	require.NoError(t, writer.Close())
+	return body.Bytes(), writer.FormDataContentType()
+}
+
+func parseOpenAIImagesMultipartTestForm(t *testing.T, body []byte, contentType string) *multipart.Form {
+	t.Helper()
+	mediaType, params, err := mime.ParseMediaType(contentType)
+	require.NoError(t, err)
+	require.Equal(t, "multipart/form-data", mediaType)
+	reader := multipart.NewReader(bytes.NewReader(body), params["boundary"])
+	form, err := reader.ReadForm(openAIImageMaxUploadPartSize)
+	require.NoError(t, err)
+	t.Cleanup(func() { _ = form.RemoveAll() })
+	return form
 }
 
 func TestCollectOpenAIImagePointers_RecognizesDirectAssets(t *testing.T) {

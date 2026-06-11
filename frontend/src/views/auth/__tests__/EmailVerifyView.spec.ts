@@ -35,6 +35,7 @@ const {
       token_field: 'pending_auth_token' | 'pending_oauth_token'
       provider: string
       redirect?: string
+      aff_code?: string
       adoption_required?: boolean
       suggested_display_name?: string
       suggested_avatar_url?: string
@@ -131,6 +132,7 @@ describe('EmailVerifyView', () => {
       token_field: 'pending_auth_token',
       provider: 'wechat',
       redirect: '/profile',
+      aff_code: 'AFF123',
     }
     sessionStorage.setItem(
       'register_data',
@@ -299,6 +301,7 @@ describe('EmailVerifyView', () => {
       token_field: 'pending_auth_token',
       provider: 'wechat',
       redirect: '/profile',
+      aff_code: 'AFF123',
     }
     sessionStorage.setItem(
       'register_data',

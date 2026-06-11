@@ -1,0 +1,23 @@
+deploy/Dockerfile
+  s_9035a8be3f1d70::t_8776ce9b040e19 31
+Dockerfile
+  s_9035a8be3f1d70::t_8776ce9b040e19 34
+.dockerignore
+  s_9035a8be3f1d70::t_8776ce9b040e19 13-15
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "8360ab197e3b319bb592b0ac2b90dda0823f80a2",
+  "prompts": {},
+  "sessions": {
+    "s_9035a8be3f1d70": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb5fd-dcd3-7170-b8c5-ebc3fc8d6088",
+        "model": "gpt-5.5"
+      },
+      "human_author": "astorm-z <forczc@foxmail.com>"
+    }
+  }
+}

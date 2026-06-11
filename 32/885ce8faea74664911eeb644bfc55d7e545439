@@ -1,0 +1,46 @@
+frontend/src/components/charts/GroupDistributionChart.vue
+  s_9035a8be3f1d70::t_ad32541db2c7e2 244-245
+frontend/src/stores/auth.ts
+  s_9035a8be3f1d70::t_714f1b5175b9df 26,54
+frontend/src/utils/billingMode.ts
+  s_9035a8be3f1d70::t_ad32541db2c7e2 28,32-38
+frontend/src/composables/usePersistedPageSize.ts
+  s_9035a8be3f1d70::t_0ca222760ab1c9 4,9-12
+frontend/src/components/charts/ModelDistributionChart.vue
+  s_9035a8be3f1d70::t_ad32541db2c7e2 498-499
+frontend/src/views/auth/__tests__/EmailVerifyView.spec.ts
+  s_9035a8be3f1d70::t_96f4cf35af6258 38
+  s_9035a8be3f1d70::t_714f1b5175b9df 135
+  s_9035a8be3f1d70::t_fcff784e47f689 304
+frontend/src/views/user/UsageView.vue
+  s_9035a8be3f1d70::t_ad32541db2c7e2 516,596
+frontend/src/components/account/AccountUsageCell.vue
+  s_9035a8be3f1d70::t_ad32541db2c7e2 665,1030-1032
+  s_9035a8be3f1d70::t_714f1b5175b9df 1219-1222
+frontend/src/views/admin/DashboardView.vue
+  s_9035a8be3f1d70::t_ad32541db2c7e2 540-541
+frontend/src/views/auth/EmailVerifyView.vue
+  s_9035a8be3f1d70::t_ad32541db2c7e2 202,291
+  s_9035a8be3f1d70::t_1866c69d9f5b2e 271,511,513-518
+frontend/src/components/admin/usage/UsageTable.vue
+  s_9035a8be3f1d70::t_ad32541db2c7e2 304
+  s_9035a8be3f1d70::t_8a2493f2d0f213 318
+frontend/src/components/charts/UserBreakdownSubTable.vue
+  s_9035a8be3f1d70::t_ad32541db2c7e2 59-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.5.6",
+  "base_commit_sha": "32885ce8faea74664911eeb644bfc55d7e545439",
+  "prompts": {},
+  "sessions": {
+    "s_9035a8be3f1d70": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019eb5fd-dcd3-7170-b8c5-ebc3fc8d6088",
+        "model": "gpt-5.5"
+      },
+      "human_author": "astorm-z <forczc@foxmail.com>"
+    }
+  }
+}

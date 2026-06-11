@@ -31,6 +31,7 @@ RUN --mount=type=cache,target=/root/.local/share/pnpm/store \
 
 # Copy frontend source and build
 COPY frontend/ ./
+COPY docs/legal/ /app/docs/legal/
 RUN pnpm run build
 
 # -----------------------------------------------------------------------------

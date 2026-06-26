@@ -199,7 +199,7 @@ One-click installation script that downloads pre-built binaries from GitHub Rele
 #### Installation Steps
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/Wei-Shaw/sub2api/main/deploy/install.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/BeiPoer/sub2api/main/deploy/install.sh | sudo bash
 ```
 
 The script will:
@@ -249,7 +249,7 @@ sudo journalctl -u sub2api -f
 sudo systemctl restart sub2api
 
 # Uninstall
-curl -sSL https://raw.githubusercontent.com/Wei-Shaw/sub2api/main/deploy/install.sh | sudo bash -s -- uninstall -y
+curl -sSL https://raw.githubusercontent.com/BeiPoer/sub2api/main/deploy/install.sh | sudo bash -s -- uninstall -y
 ```
 
 ---
@@ -272,7 +272,7 @@ Use the automated deployment script for easy setup:
 mkdir -p sub2api-deploy && cd sub2api-deploy
 
 # Download and run deployment preparation script
-curl -sSL https://raw.githubusercontent.com/Wei-Shaw/sub2api/main/deploy/docker-deploy.sh | bash
+curl -sSL https://raw.githubusercontent.com/BeiPoer/sub2api/main/deploy/docker-deploy.sh | bash
 
 # Start services
 docker compose up -d
@@ -294,7 +294,7 @@ If you prefer manual setup:
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Wei-Shaw/sub2api.git
+git clone https://github.com/BeiPoer/sub2api.git
 cd sub2api/deploy
 
 # 2. Copy environment configuration
@@ -319,6 +319,9 @@ TOTP_ENCRYPTION_KEY=your_totp_key_here
 # Optional: Admin account
 ADMIN_EMAIL=admin@example.com
 ADMIN_PASSWORD=your_admin_password
+
+# Optional: Compose image source
+SUB2API_IMAGE=ghcr.io/beipoer/sub2api:main
 
 # Optional: Custom port
 SERVER_PORT=8080
@@ -362,6 +365,17 @@ docker compose -f docker-compose.local.yml logs -f sub2api
 | **docker-compose.yml** | Named volumes | ⚠️ Requires docker commands | Simple setup |
 
 **Recommendation:** Use `docker-compose.local.yml` (deployed by script) for easier data management.
+
+#### Image Source
+
+The compose files now default to `ghcr.io/beipoer/sub2api:main`.
+This tag is built automatically by GitHub Actions on every push to the `main` branch.
+
+If you want to pin a release image instead, set this in `.env` before running compose:
+
+```bash
+SUB2API_IMAGE=ghcr.io/beipoer/sub2api:v1.2.3
+```
 
 #### Access
 
@@ -433,7 +447,7 @@ Build and run from source code for development or customization.
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/Wei-Shaw/sub2api.git
+git clone https://github.com/BeiPoer/sub2api.git
 cd sub2api
 
 # 2. Install pnpm (if not already installed)
@@ -703,11 +717,11 @@ sub2api/
 
 ## Star History
 
-<a href="https://star-history.com/#Wei-Shaw/sub2api&Date">
+<a href="https://star-history.com/#BeiPoer/sub2api&Date">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Wei-Shaw/sub2api&type=Date&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Wei-Shaw/sub2api&type=Date" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Wei-Shaw/sub2api&type=Date" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=BeiPoer/sub2api&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=BeiPoer/sub2api&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=BeiPoer/sub2api&type=Date" />
  </picture>
 </a>
 

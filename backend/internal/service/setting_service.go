@@ -953,11 +953,11 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 
 		AllowUserViewErrorRequests: settings[SettingKeyAllowUserViewErrorRequests] == "true",
 
-		ShowImageGenerationPage:        s.showImageGenerationPage(),
-		ImageGenerationGroupIDs:          s.imageGenerationGroupIDs(),
-		GPT2KImageGenerationGroupIDs:     s.gpt2KImageGenerationGroupIDs(),
-		GPT4KImageGenerationGroupIDs:     s.gpt4KImageGenerationGroupIDs(),
-		GeminiImageGenerationGroupIDs:    s.geminiImageGenerationGroupIDs(),
+		ShowImageGenerationPage:       s.showImageGenerationPage(),
+		ImageGenerationGroupIDs:       s.imageGenerationGroupIDs(),
+		GPT2KImageGenerationGroupIDs:  s.gpt2KImageGenerationGroupIDs(),
+		GPT4KImageGenerationGroupIDs:  s.gpt4KImageGenerationGroupIDs(),
+		GeminiImageGenerationGroupIDs: s.geminiImageGenerationGroupIDs(),
 	}, nil
 }
 

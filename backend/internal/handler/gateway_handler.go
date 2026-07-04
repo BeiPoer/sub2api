@@ -1011,7 +1011,7 @@ func (h *GatewayHandler) Models(c *gin.Context) {
 		return
 	}
 
-	if len(availableModels) > 0 {
+	if availableModels != nil {
 		writeModelsList(c, availableModels)
 		return
 	}
@@ -1095,7 +1095,7 @@ func filterModelsByCustomList(availableModels, fallbackModels, selectedModels []
 		return availableModels
 	}
 	source := availableModels
-	if len(source) == 0 {
+	if source == nil {
 		source = fallbackModels
 	}
 	if len(source) == 0 {

@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
 	"sync/atomic"
 	"time"
@@ -77,6 +78,7 @@ type Config struct {
 	GitHubOAuth             EmailOAuthProviderConfig      `mapstructure:"github_oauth"`
 	GoogleOAuth             EmailOAuthProviderConfig      `mapstructure:"google_oauth"`
 	Default                 DefaultConfig                 `mapstructure:"default"`
+	ImageGeneration         ImageGenerationConfig         `mapstructure:"image_generation"`
 	RateLimit               RateLimitConfig               `mapstructure:"rate_limit"`
 	Pricing                 PricingConfig                 `mapstructure:"pricing"`
 	Gateway                 GatewayConfig                 `mapstructure:"gateway"`
@@ -1270,6 +1272,92 @@ type DefaultConfig struct {
 	RateMultiplier  float64 `mapstructure:"rate_multiplier"`
 }
 
+// ImageGenerationConfig 用户面板"生图"页面配置
+type ImageGenerationConfig struct {
+	// GPT2KGroupIDs 逗号分隔的分组 ID 列表（如 "1,2,3"）。
+	// 生图页面会展示这些分组下的 API Key，但隐藏 4K 宽高比选项。
+	// 环境变量：GPT_2K_IMAGE_GENERATION_GROUP_IDS
+	GPT2KGroupIDs string `mapstructure:"gpt_2k_image_generation_group_ids"`
+
+	// GPT4KGroupIDs 逗号分隔的分组 ID 列表。
+	// 生图页面会展示这些分组下的 API Key，并允许 4K 宽高比选项。
+	// 环境变量：GPT_4K_IMAGE_GENERATION_GROUP_IDS
+	GPT4KGroupIDs string `mapstructure:"gpt_4k_image_generation_group_ids"`
+
+	// GeminiGroupIDs 预留给 Gemini 生图分组。
+	// 环境变量：GEMINI_IMAGE_GENERATION_GROUP_IDS
+	GeminiGroupIDs string `mapstructure:"gemini_image_generation_group_ids"`
+
+	// GroupIDs 为旧配置 IMAGE_GENERATION_GROUP_IDS 的兼容字段。
+	GroupIDs string `mapstructure:"group_ids"`
+}
+
+// ParsedGroupIDs 将逗号分隔的分组 ID 字符串解析为 int64 列表，忽略空段与非法值。
+func (c ImageGenerationConfig) ParsedGroupIDs() []int64 {
+	return parseImageGenerationGroupIDs(c.GroupIDs)
+}
+
+func (c ImageGenerationConfig) ParsedGPT2KGroupIDs() []int64 {
+	return parseImageGenerationGroupIDs(c.GPT2KGroupIDs)
+}
+
+func (c ImageGenerationConfig) ParsedGPT4KGroupIDs() []int64 {
+	return parseImageGenerationGroupIDs(c.GPT4KGroupIDs)
+}
+
+func (c ImageGenerationConfig) ParsedGeminiGroupIDs() []int64 {
+	return parseImageGenerationGroupIDs(c.GeminiGroupIDs)
+}
+
+func (c ImageGenerationConfig) ParsedAllowedGroupIDs() []int64 {
+	return mergeImageGenerationGroupIDs(
+		c.ParsedGPT2KGroupIDs(),
+		c.ParsedGPT4KGroupIDs(),
+		c.ParsedGeminiGroupIDs(),
+		c.ParsedGroupIDs(),
+	)
+}
+
+func parseImageGenerationGroupIDs(raw string) []int64 {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return nil
+	}
+	parts := strings.Split(raw, ",")
+	ids := make([]int64, 0, len(parts))
+	seen := make(map[int64]struct{}, len(parts))
+	for _, part := range parts {
+		id, err := strconv.ParseInt(strings.TrimSpace(part), 10, 64)
+		if err != nil || id <= 0 {
+			continue
+		}
+		if _, ok := seen[id]; ok {
+			continue
+		}
+		seen[id] = struct{}{}
+		ids = append(ids, id)
+	}
+	return ids
+}
+
+func mergeImageGenerationGroupIDs(groups ...[]int64) []int64 {
+	ids := make([]int64, 0)
+	seen := map[int64]struct{}{}
+	for _, group := range groups {
+		for _, id := range group {
+			if id <= 0 {
+				continue
+			}
+			if _, ok := seen[id]; ok {
+				continue
+			}
+			seen[id] = struct{}{}
+			ids = append(ids, id)
+		}
+	}
+	return ids
+}
+
 type RateLimitConfig struct {
 	OverloadCooldownMinutes int `mapstructure:"overload_cooldown_minutes"`  // 529过载冷却时间(分钟)
 	OAuth401CooldownMinutes int `mapstructure:"oauth_401_cooldown_minutes"` // OAuth 401临时不可调度冷却(分钟)
@@ -1396,6 +1484,9 @@ func load(allowMissingJWTSecret bool) (*Config, error) {
 	// 环境变量支持
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	_ = viper.BindEnv("image_generation.gpt_2k_image_generation_group_ids", "GPT_2K_IMAGE_GENERATION_GROUP_IDS")
+	_ = viper.BindEnv("image_generation.gpt_4k_image_generation_group_ids", "GPT_4K_IMAGE_GENERATION_GROUP_IDS")
+	_ = viper.BindEnv("image_generation.gemini_image_generation_group_ids", "GEMINI_IMAGE_GENERATION_GROUP_IDS")
 
 	// 默认值
 	setDefaults()
@@ -1759,6 +1850,12 @@ func setDefaults() {
 	viper.SetDefault("default.user_balance", 0)
 	viper.SetDefault("default.api_key_prefix", "sk-")
 	viper.SetDefault("default.rate_multiplier", 1.0)
+
+	// 生图页面配置
+	viper.SetDefault("image_generation.gpt_2k_image_generation_group_ids", "")
+	viper.SetDefault("image_generation.gpt_4k_image_generation_group_ids", "")
+	viper.SetDefault("image_generation.gemini_image_generation_group_ids", "")
+	viper.SetDefault("image_generation.group_ids", "")
 
 	// RateLimit
 	viper.SetDefault("rate_limit.overload_cooldown_minutes", 10)

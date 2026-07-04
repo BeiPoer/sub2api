@@ -100,6 +100,11 @@ func (h *SettingHandler) GetPublicSettings(c *gin.Context) {
 		RiskControlEnabled: settings.RiskControlEnabled,
 
 		AllowUserViewErrorRequests: settings.AllowUserViewErrorRequests,
+
+		ImageGenerationGroupIDs:       settings.ImageGenerationGroupIDs,
+		GPT2KImageGenerationGroupIDs:  settings.GPT2KImageGenerationGroupIDs,
+		GPT4KImageGenerationGroupIDs:  settings.GPT4KImageGenerationGroupIDs,
+		GeminiImageGenerationGroupIDs: settings.GeminiImageGenerationGroupIDs,
 	})
 }
 

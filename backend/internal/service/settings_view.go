@@ -310,6 +310,12 @@ type PublicSettings struct {
 
 	// 允许终端用户在用量页查看自己的失败请求
 	AllowUserViewErrorRequests bool `json:"allow_user_view_error_requests"`
+
+	// 生图页面：限定用户可选 API Key 的分组 ID 列表（来自服务端配置，空 = 不限制）
+	ImageGenerationGroupIDs          []int64 `json:"image_generation_group_ids"`
+	GPT2KImageGenerationGroupIDs     []int64 `json:"gpt_2k_image_generation_group_ids"`
+	GPT4KImageGenerationGroupIDs     []int64 `json:"gpt_4k_image_generation_group_ids"`
+	GeminiImageGenerationGroupIDs    []int64 `json:"gemini_image_generation_group_ids"`
 }
 
 type LoginAgreementDocument struct {

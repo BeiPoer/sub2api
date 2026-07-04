@@ -951,7 +951,41 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		RiskControlEnabled: settings[SettingKeyRiskControlEnabled] == "true",
 
 		AllowUserViewErrorRequests: settings[SettingKeyAllowUserViewErrorRequests] == "true",
+
+		ImageGenerationGroupIDs:          s.imageGenerationGroupIDs(),
+		GPT2KImageGenerationGroupIDs:     s.gpt2KImageGenerationGroupIDs(),
+		GPT4KImageGenerationGroupIDs:     s.gpt4KImageGenerationGroupIDs(),
+		GeminiImageGenerationGroupIDs:    s.geminiImageGenerationGroupIDs(),
 	}, nil
+}
+
+// imageGenerationGroupIDs 读取服务端配置的生图分组 ID 并集（兼容旧字段）。
+func (s *SettingService) imageGenerationGroupIDs() []int64 {
+	if s == nil || s.cfg == nil {
+		return nil
+	}
+	return s.cfg.ImageGeneration.ParsedAllowedGroupIDs()
+}
+
+func (s *SettingService) gpt2KImageGenerationGroupIDs() []int64 {
+	if s == nil || s.cfg == nil {
+		return nil
+	}
+	return s.cfg.ImageGeneration.ParsedGPT2KGroupIDs()
+}
+
+func (s *SettingService) gpt4KImageGenerationGroupIDs() []int64 {
+	if s == nil || s.cfg == nil {
+		return nil
+	}
+	return s.cfg.ImageGeneration.ParsedGPT4KGroupIDs()
+}
+
+func (s *SettingService) geminiImageGenerationGroupIDs() []int64 {
+	if s == nil || s.cfg == nil {
+		return nil
+	}
+	return s.cfg.ImageGeneration.ParsedGeminiGroupIDs()
 }
 
 // channelMonitorIntervalMin / channelMonitorIntervalMax bound the default interval
@@ -1469,12 +1503,16 @@ type PublicSettingsInjectionPayload struct {
 	// Feature flags — MUST match the opt-in/opt-out registry in
 	// frontend/src/utils/featureFlags.ts. Missing a field here is the bug
 	// that hid the "可用渠道" menu on page refresh.
-	ChannelMonitorEnabled                bool `json:"channel_monitor_enabled"`
-	ChannelMonitorDefaultIntervalSeconds int  `json:"channel_monitor_default_interval_seconds"`
-	AvailableChannelsEnabled             bool `json:"available_channels_enabled"`
-	AffiliateEnabled                     bool `json:"affiliate_enabled"`
-	RiskControlEnabled                   bool `json:"risk_control_enabled"`
-	AllowUserViewErrorRequests           bool `json:"allow_user_view_error_requests"`
+	ChannelMonitorEnabled                bool    `json:"channel_monitor_enabled"`
+	ChannelMonitorDefaultIntervalSeconds int     `json:"channel_monitor_default_interval_seconds"`
+	AvailableChannelsEnabled             bool    `json:"available_channels_enabled"`
+	AffiliateEnabled                     bool    `json:"affiliate_enabled"`
+	RiskControlEnabled                   bool    `json:"risk_control_enabled"`
+	AllowUserViewErrorRequests           bool    `json:"allow_user_view_error_requests"`
+	ImageGenerationGroupIDs              []int64 `json:"image_generation_group_ids"`
+	GPT2KImageGenerationGroupIDs         []int64 `json:"gpt_2k_image_generation_group_ids"`
+	GPT4KImageGenerationGroupIDs         []int64 `json:"gpt_4k_image_generation_group_ids"`
+	GeminiImageGenerationGroupIDs        []int64 `json:"gemini_image_generation_group_ids"`
 }
 
 // GetPublicSettingsForInjection returns public settings in a format suitable for HTML injection.
@@ -1538,6 +1576,10 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		AffiliateEnabled:                     settings.AffiliateEnabled,
 		RiskControlEnabled:                   settings.RiskControlEnabled,
 		AllowUserViewErrorRequests:           settings.AllowUserViewErrorRequests,
+		ImageGenerationGroupIDs:              settings.ImageGenerationGroupIDs,
+		GPT2KImageGenerationGroupIDs:         settings.GPT2KImageGenerationGroupIDs,
+		GPT4KImageGenerationGroupIDs:         settings.GPT4KImageGenerationGroupIDs,
+		GeminiImageGenerationGroupIDs:        settings.GeminiImageGenerationGroupIDs,
 	}, nil
 }
 

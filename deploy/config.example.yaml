@@ -979,6 +979,24 @@ default:
   rate_multiplier: 1.0
 
 # =============================================================================
+# Image Generation Page (Optional)
+# 用户面板"生图"页面（可选）
+# =============================================================================
+image_generation:
+  # GPT 2K image generation group IDs. Selecting these keys hides 4K aspect-ratio options.
+  # GPT 2K 生图分组 ID；选中这些 key 时隐藏 4K 宽高比选项。
+  gpt_2k_image_generation_group_ids: ""
+  # GPT 4K image generation group IDs. Selecting these keys allows 4K aspect-ratio options.
+  # GPT 4K 生图分组 ID；选中这些 key 时展示 4K 宽高比选项。
+  gpt_4k_image_generation_group_ids: ""
+  # Reserved for Gemini image generation group IDs.
+  # Gemini 生图分组 ID（预留）。
+  gemini_image_generation_group_ids: ""
+  # Legacy compatible field. Prefer the split fields above.
+  # 旧配置兼容项，推荐改用上面三个拆分配置。
+  group_ids: ""
+
+# =============================================================================
 # Rate Limiting
 # 速率限制
 # =============================================================================

@@ -220,6 +220,15 @@ func cloneStringSlice(src []string) []string {
 	return dst
 }
 
+func cloneModelsList(src []string) []string {
+	if src == nil {
+		return nil
+	}
+	dst := make([]string, len(src))
+	copy(dst, src)
+	return dst
+}
+
 // IsForceCacheBilling 检查是否启用强制缓存计费
 func IsForceCacheBilling(ctx context.Context) bool {
 	v, _ := ctx.Value(ForceCacheBillingContextKey).(bool)
@@ -10504,15 +10513,17 @@ func (s *GatewayService) validateUpstreamBaseURL(raw string) (string, error) {
 	return normalized, nil
 }
 
-// GetAvailableModels returns the list of models available for a group
-// It aggregates model_mapping keys from all schedulable accounts in the group
+// GetAvailableModels returns the list of models available for a group.
+// It aggregates model_mapping keys from all schedulable accounts in the group.
+// A nil result means "accounts exist but no model_mapping is configured";
+// an empty non-nil result means "no schedulable accounts are available".
 func (s *GatewayService) GetAvailableModels(ctx context.Context, groupID *int64, platform string) []string {
 	cacheKey := modelsListCacheKey(groupID, platform)
 	if s.modelsListCache != nil {
 		if cached, found := s.modelsListCache.Get(cacheKey); found {
 			if models, ok := cached.([]string); ok {
 				modelsListCacheHitTotal.Add(1)
-				return cloneStringSlice(models)
+				return cloneModelsList(models)
 			}
 		}
 	}
@@ -10527,8 +10538,15 @@ func (s *GatewayService) GetAvailableModels(ctx context.Context, groupID *int64,
 		accounts, err = s.accountRepo.ListSchedulable(ctx)
 	}
 
-	if err != nil || len(accounts) == 0 {
+	if err != nil {
 		return nil
+	}
+	if len(accounts) == 0 {
+		if s.modelsListCache != nil {
+			s.modelsListCache.Set(cacheKey, []string{}, s.modelsListCacheTTL)
+			modelsListCacheStoreTotal.Add(1)
+		}
+		return []string{}
 	}
 
 	// Filter by platform if specified
@@ -10540,6 +10558,13 @@ func (s *GatewayService) GetAvailableModels(ctx context.Context, groupID *int64,
 			}
 		}
 		accounts = filtered
+	}
+	if len(accounts) == 0 {
+		if s.modelsListCache != nil {
+			s.modelsListCache.Set(cacheKey, []string{}, s.modelsListCacheTTL)
+			modelsListCacheStoreTotal.Add(1)
+		}
+		return []string{}
 	}
 
 	// Collect unique models from all accounts
@@ -10573,10 +10598,10 @@ func (s *GatewayService) GetAvailableModels(ctx context.Context, groupID *int64,
 	sort.Strings(models)
 
 	if s.modelsListCache != nil {
-		s.modelsListCache.Set(cacheKey, cloneStringSlice(models), s.modelsListCacheTTL)
+		s.modelsListCache.Set(cacheKey, cloneModelsList(models), s.modelsListCacheTTL)
 		modelsListCacheStoreTotal.Add(1)
 	}
-	return cloneStringSlice(models)
+	return cloneModelsList(models)
 }
 
 func (s *GatewayService) InvalidateAvailableModelsCache(groupID *int64, platform string) {

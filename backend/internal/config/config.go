@@ -1274,6 +1274,10 @@ type DefaultConfig struct {
 
 // ImageGenerationConfig 用户面板"生图"页面配置
 type ImageGenerationConfig struct {
+	// ShowPage 为 true 时在用户侧边栏展示"生图"入口。
+	// 环境变量：SHOW_IMAGE_GENERATION_PAGE
+	ShowPage bool `mapstructure:"show_page"`
+
 	// GPT2KGroupIDs 逗号分隔的分组 ID 列表（如 "1,2,3"）。
 	// 生图页面会展示这些分组下的 API Key，但隐藏 4K 宽高比选项。
 	// 环境变量：GPT_2K_IMAGE_GENERATION_GROUP_IDS
@@ -1484,6 +1488,7 @@ func load(allowMissingJWTSecret bool) (*Config, error) {
 	// 环境变量支持
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	_ = viper.BindEnv("image_generation.show_page", "SHOW_IMAGE_GENERATION_PAGE")
 	_ = viper.BindEnv("image_generation.gpt_2k_image_generation_group_ids", "GPT_2K_IMAGE_GENERATION_GROUP_IDS")
 	_ = viper.BindEnv("image_generation.gpt_4k_image_generation_group_ids", "GPT_4K_IMAGE_GENERATION_GROUP_IDS")
 	_ = viper.BindEnv("image_generation.gemini_image_generation_group_ids", "GEMINI_IMAGE_GENERATION_GROUP_IDS")

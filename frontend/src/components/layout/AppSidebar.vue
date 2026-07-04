@@ -682,7 +682,14 @@ function buildSelfNavItems(withDashboard: boolean): NavItem[] {
   items.push(
     { path: '/keys', label: t('nav.apiKeys'), icon: KeyIcon },
     { path: '/usage', label: t('nav.usage'), icon: ChartIcon, hideInSimpleMode: true },
-    { path: '/image-generation', label: '生图', icon: PhotoIcon },
+    {
+      path: '/image-generation',
+      label: '生图',
+      icon: PhotoIcon,
+      featureFlag: () =>
+        ((appStore.cachedPublicSettings ?? {}) as { show_image_generation_page?: boolean })
+          .show_image_generation_page === true,
+    },
     { path: '/available-channels', label: t('nav.availableChannels'), icon: ChannelIcon, hideInSimpleMode: true, featureFlag: flagAvailableChannels },
     { path: '/monitor', label: t('nav.channelStatus'), icon: SignalIcon, featureFlag: flagChannelMonitor },
     { path: '/subscriptions', label: t('nav.mySubscriptions'), icon: CreditCardIcon, hideInSimpleMode: true },

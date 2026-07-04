@@ -101,6 +101,7 @@ func (h *SettingHandler) GetPublicSettings(c *gin.Context) {
 
 		AllowUserViewErrorRequests: settings.AllowUserViewErrorRequests,
 
+		ShowImageGenerationPage:     settings.ShowImageGenerationPage,
 		ImageGenerationGroupIDs:       settings.ImageGenerationGroupIDs,
 		GPT2KImageGenerationGroupIDs:  settings.GPT2KImageGenerationGroupIDs,
 		GPT4KImageGenerationGroupIDs:  settings.GPT4KImageGenerationGroupIDs,

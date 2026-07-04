@@ -952,11 +952,16 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 
 		AllowUserViewErrorRequests: settings[SettingKeyAllowUserViewErrorRequests] == "true",
 
+		ShowImageGenerationPage:        s.showImageGenerationPage(),
 		ImageGenerationGroupIDs:          s.imageGenerationGroupIDs(),
 		GPT2KImageGenerationGroupIDs:     s.gpt2KImageGenerationGroupIDs(),
 		GPT4KImageGenerationGroupIDs:     s.gpt4KImageGenerationGroupIDs(),
 		GeminiImageGenerationGroupIDs:    s.geminiImageGenerationGroupIDs(),
 	}, nil
+}
+
+func (s *SettingService) showImageGenerationPage() bool {
+	return s != nil && s.cfg != nil && s.cfg.ImageGeneration.ShowPage
 }
 
 // imageGenerationGroupIDs 读取服务端配置的生图分组 ID 并集（兼容旧字段）。
@@ -1509,6 +1514,7 @@ type PublicSettingsInjectionPayload struct {
 	AffiliateEnabled                     bool    `json:"affiliate_enabled"`
 	RiskControlEnabled                   bool    `json:"risk_control_enabled"`
 	AllowUserViewErrorRequests           bool    `json:"allow_user_view_error_requests"`
+	ShowImageGenerationPage              bool    `json:"show_image_generation_page"`
 	ImageGenerationGroupIDs              []int64 `json:"image_generation_group_ids"`
 	GPT2KImageGenerationGroupIDs         []int64 `json:"gpt_2k_image_generation_group_ids"`
 	GPT4KImageGenerationGroupIDs         []int64 `json:"gpt_4k_image_generation_group_ids"`
@@ -1576,6 +1582,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		AffiliateEnabled:                     settings.AffiliateEnabled,
 		RiskControlEnabled:                   settings.RiskControlEnabled,
 		AllowUserViewErrorRequests:           settings.AllowUserViewErrorRequests,
+		ShowImageGenerationPage:              settings.ShowImageGenerationPage,
 		ImageGenerationGroupIDs:              settings.ImageGenerationGroupIDs,
 		GPT2KImageGenerationGroupIDs:         settings.GPT2KImageGenerationGroupIDs,
 		GPT4KImageGenerationGroupIDs:         settings.GPT4KImageGenerationGroupIDs,

@@ -983,6 +983,9 @@ default:
 # 用户面板"生图"页面（可选）
 # =============================================================================
 image_generation:
+  # Whether to show the user sidebar "Image Generation" entry.
+  # 是否展示用户侧边栏"生图"入口。
+  show_page: false
   # GPT 2K image generation group IDs. Selecting these keys hides 4K aspect-ratio options.
   # GPT 2K 生图分组 ID；选中这些 key 时隐藏 4K 宽高比选项。
   gpt_2k_image_generation_group_ids: ""

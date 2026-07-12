@@ -376,6 +376,12 @@
                         />
                       </label>
                     </div>
+                    <p
+                      v-if="sizeValidationError"
+                      class="mt-1 text-xs text-red-600 dark:text-red-400"
+                    >
+                      {{ sizeValidationError }}
+                    </p>
                   </div>
                   <div>
                     <div class="mb-1 flex items-center gap-1">
@@ -575,6 +581,7 @@ import Icon from '@/components/icons/Icon.vue'
 import { useAppStore } from '@/stores/app'
 import { keysAPI } from '@/api/keys'
 import { userGroupsAPI } from '@/api/groups'
+import { validateOpenAIImageSize } from '@/utils/openaiImageSize'
 import {
   generateImages,
   listModels,
@@ -1141,8 +1148,17 @@ function qualityLabel(value: string): string {
 }
 
 const size = computed(() =>
-  selectedAspectRatio.value === 'auto' ? 'auto' : `${imageWidth.value}x${imageHeight.value}`
+  selectedAspectRatio.value === 'auto'
+    ? 'auto'
+    : imageDimensionValue(imageWidth.value) != null && imageDimensionValue(imageHeight.value) != null
+      ? `${imageDimensionValue(imageWidth.value)}x${imageDimensionValue(imageHeight.value)}`
+      : ''
 )
+
+const sizeValidationError = computed(() => {
+  if (selectedImageProvider.value !== 'openai') return ''
+  return validateOpenAIImageSize(size.value, model.value)
+})
 
 const selectedAspectRatioOption = computed(() =>
   aspectRatioOptions.find((item) => item.value === selectedAspectRatio.value)
@@ -1173,9 +1189,14 @@ const settingsSummary = computed(() => {
   return `${qualityLabel(quality.value)} · ${sizeSummary.value} · ${imageText('imagesCount', { count: count.value })}`
 })
 
-function clampImageDimension(value: number): number {
-  if (!Number.isFinite(value)) return 1024
-  return Math.min(4096, Math.max(512, Math.round(value)))
+function imageDimensionValue(value: unknown): number | null {
+  const number = Number(value)
+  return Number.isInteger(number) && number > 0 ? number : null
+}
+
+function storedImageDimension(value: number): number {
+  const dimension = Math.round(value)
+  return Number.isFinite(dimension) && dimension > 0 ? dimension : 1024
 }
 
 function matchAspectRatioValue(width: number, height: number): string {
@@ -1191,8 +1212,8 @@ function applySizeString(value: string) {
   }
   const match = value.match(/^(\d+)x(\d+)$/i)
   if (!match) return
-  imageWidth.value = clampImageDimension(Number(match[1]))
-  imageHeight.value = clampImageDimension(Number(match[2]))
+  imageWidth.value = Number(match[1])
+  imageHeight.value = Number(match[2])
   selectedAspectRatio.value = matchAspectRatioValue(imageWidth.value, imageHeight.value)
 }
 
@@ -1206,9 +1227,9 @@ function selectAspectRatio(option: AspectRatioOption) {
 }
 
 function onCustomSizeInput() {
-  imageWidth.value = clampImageDimension(imageWidth.value)
-  imageHeight.value = clampImageDimension(imageHeight.value)
-  selectedAspectRatio.value = matchAspectRatioValue(imageWidth.value, imageHeight.value)
+  const width = imageDimensionValue(imageWidth.value)
+  const height = imageDimensionValue(imageHeight.value)
+  selectedAspectRatio.value = width != null && height != null ? matchAspectRatioValue(width, height) : 'custom'
 }
 
 function aspectRatioIconStyle(option: AspectRatioOption): Record<string, string> {
@@ -1258,8 +1279,8 @@ function loadPrefs() {
       applySizeString(prefs.size)
     }
     if (typeof prefs.width === 'number' && typeof prefs.height === 'number') {
-      imageWidth.value = clampImageDimension(prefs.width)
-      imageHeight.value = clampImageDimension(prefs.height)
+      imageWidth.value = storedImageDimension(prefs.width)
+      imageHeight.value = storedImageDimension(prefs.height)
       selectedAspectRatio.value = matchAspectRatioValue(imageWidth.value, imageHeight.value)
     }
     if (typeof prefs.quality === 'string' && prefs.quality) quality.value = prefs.quality
@@ -1715,6 +1736,11 @@ async function onSubmit() {
   const selectedModel = model.value.trim()
   if (!selectedModel) {
     appStore.showError(imageText('modelRequired'))
+    settingsOpen.value = true
+    return
+  }
+  if (sizeValidationError.value) {
+    appStore.showError(sizeValidationError.value)
     settingsOpen.value = true
     return
   }

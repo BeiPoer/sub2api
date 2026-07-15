@@ -256,6 +256,7 @@
             ref="promptInput"
             v-model="prompt"
             class="w-full resize-none border-0 bg-transparent px-1 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 dark:text-white dark:placeholder-gray-500"
+            :class="isPromptExpanded ? 'h-[50vh]' : ''"
             :placeholder="imageText('promptPlaceholder')"
             rows="2"
             @keydown.enter.exact.prevent="onSubmit"
@@ -292,6 +293,17 @@
                 class="hidden"
                 @change="onFilesSelected"
               />
+
+              <!-- Expand prompt -->
+              <button
+                type="button"
+                class="flex h-8 w-8 items-center justify-center rounded-lg text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-dark-700 dark:hover:text-gray-200"
+                :title="imageText(isPromptExpanded ? 'collapsePrompt' : 'expandPrompt')"
+                :aria-label="imageText(isPromptExpanded ? 'collapsePrompt' : 'expandPrompt')"
+                @click="isPromptExpanded = !isPromptExpanded"
+              >
+                <Icon :name="isPromptExpanded ? 'chevronDown' : 'chevronUp'" size="md" />
+              </button>
 
               <!-- Settings popover trigger -->
               <div ref="settingsWrap" class="relative">
@@ -713,6 +725,8 @@ const imageMessages: Record<string, string | ((params: Record<string, unknown>) 
   settings: '设置',
   newConversation: '新对话',
   addReference: '添加参考图',
+  expandPrompt: '展开提示词输入框',
+  collapsePrompt: '收起提示词输入框',
   promptPlaceholder: '描述你想生成的图像，例如：一只在草地上奔跑的柯基犬，阳光明媚，摄影风格',
   promptRequired: '请输入提示词',
   keyMissing: '请先选择 API 密钥',
@@ -872,6 +886,7 @@ const count = ref(1)
 const referenceImages = ref<ReferenceImage[]>([])
 const fileInput = ref<HTMLInputElement | null>(null)
 const promptInput = ref<HTMLTextAreaElement | null>(null)
+const isPromptExpanded = ref(false)
 const isComposerDragOver = ref(false)
 let composerDragDepth = 0
 const historyLoading = ref(false)

@@ -2185,6 +2185,7 @@ func setDefaults() {
 	viper.SetDefault("default.rate_multiplier", 1.0)
 
 	// 生图页面配置
+	viper.SetDefault("image_generation.show_page", false)
 	viper.SetDefault("image_generation.gpt_2k_image_generation_group_ids", "")
 	viper.SetDefault("image_generation.gpt_4k_image_generation_group_ids", "")
 	viper.SetDefault("image_generation.gemini_image_generation_group_ids", "")

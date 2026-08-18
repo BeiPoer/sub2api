@@ -1795,6 +1795,10 @@ func load(allowMissingJWTSecret bool) (*Config, error) {
 	// 环境变量支持
 	viper.AutomaticEnv()
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	if tz, ok := os.LookupEnv("TZ"); ok && strings.TrimSpace(tz) != "" {
+		// AutomaticEnv 会先把 timezone 映射到 TIMEZONE；显式 Set 保证标准 TZ 变量优先。
+		viper.Set("timezone", strings.TrimSpace(tz))
+	}
 	_ = viper.BindEnv("image_generation.show_page", "SHOW_IMAGE_GENERATION_PAGE")
 	_ = viper.BindEnv("image_generation.gpt_2k_image_generation_group_ids", "GPT_2K_IMAGE_GENERATION_GROUP_IDS")
 	_ = viper.BindEnv("image_generation.gpt_4k_image_generation_group_ids", "GPT_4K_IMAGE_GENERATION_GROUP_IDS")

@@ -95,7 +95,7 @@
                     }}
                   </span>
                   <span>{{ turn.model }}</span>
-                  <span>{{ turn.size === 'auto' ? imageText('sizeAuto') : turn.size }}</span>
+                  <span v-if="turnSizeSummary(turn)">{{ turnSizeSummary(turn) }}</span>
                   <span>{{ imageText('imagesCount', { count: turn.n }) }}</span>
                 </div>
               </div>
@@ -350,7 +350,7 @@
                       {{ modelsError }}
                     </p>
                   </div>
-                  <div>
+                  <div v-if="showSizeInputs">
                     <div class="mb-1 flex items-center gap-1">
                       <label class="input-label mb-0">{{ imageText('size') }}</label>
                       <span class="text-xs text-gray-400 dark:text-gray-500" :title="imageText('sizeHint')">
@@ -395,10 +395,32 @@
                       {{ sizeValidationError }}
                     </p>
                   </div>
+                  <div v-if="isBanana">
+                    <label class="input-label">{{ imageText('resolution') }}</label>
+                    <div class="flex flex-wrap gap-1.5">
+                      <button
+                        v-for="option in bananaImageSizeOptions"
+                        :key="option"
+                        type="button"
+                        class="rounded-lg border px-2.5 py-1 text-xs transition-colors"
+                        :class="
+                          bananaImageSize === option
+                            ? 'border-primary-500 bg-primary-50 text-primary-600 dark:bg-primary-500/10 dark:text-primary-400'
+                            : 'border-gray-200 text-gray-600 hover:border-gray-300 dark:border-dark-600 dark:text-gray-300'
+                        "
+                        @click="bananaImageSize = option"
+                      >
+                        {{ option }}
+                      </button>
+                    </div>
+                  </div>
                   <div>
                     <div class="mb-1 flex items-center gap-1">
                       <label class="input-label mb-0">{{ imageText('aspectRatio') }}</label>
-                      <span class="text-xs text-gray-400 dark:text-gray-500" :title="imageText('aspectRatioHint')">
+                      <span
+                        class="text-xs text-gray-400 dark:text-gray-500"
+                        :title="imageText(showSizeInputs ? 'aspectRatioHint' : 'aspectRatioPresetHint')"
+                      >
                         <Icon name="infoCircle" size="xs" />
                       </span>
                     </div>
@@ -424,7 +446,7 @@
                       </button>
                     </div>
                   </div>
-                  <div>
+                  <div v-if="!isBanana">
                     <label class="input-label">{{ imageText('quality') }}</label>
                     <div class="flex flex-wrap gap-1.5">
                       <button
@@ -633,6 +655,7 @@ interface HistoryTurn {
   model: string
   provider?: ImageGenerationProvider
   size: string
+  displaySize?: string
   aspectRatio?: string
   imageSize?: string
   quality: string
@@ -662,6 +685,7 @@ interface Turn {
   model: string
   provider: ImageGenerationProvider
   size: string
+  displaySize?: string
   aspectRatio?: string
   imageSize?: string
   quality: string
@@ -681,7 +705,6 @@ interface AspectRatioOption {
   label: string
   width: number
   height: number
-  tier?: '2k' | '4k'
   disabled?: boolean
 }
 
@@ -714,8 +737,10 @@ const imageMessages: Record<string, string | ((params: Record<string, unknown>) 
   size: '尺寸',
   sizeAuto: '自动',
   sizeHint: '宽高会作为 size 参数传给生图接口',
+  resolution: '分辨率',
   aspectRatio: '宽高比',
   aspectRatioHint: '选择宽高比会自动填充推荐宽高，也可以手动输入尺寸',
+  aspectRatioPresetHint: '选择宽高比',
   quality: '质量',
   qualityAuto: '自动',
   qualityLow: '低',
@@ -836,6 +861,9 @@ const selectedKeyAllows4K = computed(() => {
   if (gpt2KGroupIds.value.includes(groupId)) return false
   return true
 })
+const isBanana = computed(() => selectedImageProvider.value === 'gemini')
+const isGPT4K = computed(() => !isBanana.value && selectedKeyAllows4K.value)
+const showSizeInputs = computed(() => isGPT4K.value)
 
 async function loadKeys() {
   keysLoading.value = true
@@ -881,6 +909,7 @@ const modelsError = ref('')
 const imageWidth = ref(1024)
 const imageHeight = ref(1024)
 const selectedAspectRatio = ref('1:1')
+const bananaImageSize = ref('1K')
 const quality = ref('auto')
 const count = ref(1)
 const referenceImages = ref<ReferenceImage[]>([])
@@ -1118,36 +1147,43 @@ watch(
   { immediate: true }
 )
 
-const aspectRatioOptions: AspectRatioOption[] = [
+const gptImageAspectRatioOptions: AspectRatioOption[] = [
   { value: '1:1', label: '1:1', width: 1024, height: 1024 },
-  { value: '2:3', label: '2:3', width: 1024, height: 1536 },
-  { value: '3:2', label: '3:2', width: 1536, height: 1024 },
-  { value: '3:4', label: '3:4', width: 1024, height: 1365 },
-  { value: '4:3', label: '4:3', width: 1365, height: 1024 },
-  { value: '9:16', label: '9:16', width: 1024, height: 1820 },
-  { value: '16:9', label: '16:9', width: 1920, height: 1088 },
-  { value: '1:1-2k', label: '1:1(2k)', width: 2048, height: 2048, tier: '2k' },
-  { value: '16:9-2k', label: '16:9(2k)', width: 2048, height: 1152, tier: '2k' },
-  { value: '9:16-2k', label: '9:16(2k)', width: 1152, height: 2048, tier: '2k' },
-  { value: '16:9-4k', label: '16:9(4k)', width: 3840, height: 2160, tier: '4k' },
-  { value: '9:16-4k', label: '9:16(4k)', width: 2160, height: 3840, tier: '4k' },
-  { value: 'auto', label: 'auto', width: 1024, height: 1024 }
+  { value: '3:4', label: '3:4', width: 768, height: 1024 },
+  { value: '4:3', label: '4:3', width: 1024, height: 768 },
+  { value: '9:16', label: '9:16', width: 1152, height: 2048 },
+  { value: '16:9', label: '16:9', width: 2048, height: 1152 }
 ]
 
-const selectedGeminiAllowsImageSize = computed(() => {
-  if (selectedImageProvider.value !== 'gemini') return true
-  const id = model.value.trim().toLowerCase()
-  if (!id) return true
-  return !id.includes('gemini-2.5-flash-image')
-})
+const gptImage4KAspectRatioOptions: AspectRatioOption[] = [
+  { value: '1:1-1k', label: '1:1 · 1K', width: 1024, height: 1024 },
+  { value: '3:4-1k', label: '3:4 · 1K', width: 768, height: 1024 },
+  { value: '4:3-1k', label: '4:3 · 1K', width: 1024, height: 768 },
+  { value: '1:1-2k', label: '1:1 · 2K', width: 2048, height: 2048 },
+  { value: '9:16-2k', label: '9:16 · 2K', width: 1152, height: 2048 },
+  { value: '16:9-2k', label: '16:9 · 2K', width: 2048, height: 1152 },
+  { value: '1:1-4k', label: '1:1 · 4K', width: 2880, height: 2880 },
+  { value: '9:16-4k', label: '9:16 · 4K', width: 2160, height: 3840 },
+  { value: '16:9-4k', label: '16:9 · 4K', width: 3840, height: 2160 }
+]
 
-const visibleAspectRatioOptions = computed(() =>
-  aspectRatioOptions.filter((option) => {
-    if (!selectedKeyAllows4K.value && option.tier === '4k') return false
-    if (!selectedGeminiAllowsImageSize.value && option.tier) return false
-    return true
-  })
-)
+const bananaAspectRatioOptions: AspectRatioOption[] = [
+  { value: '1:1', label: '1:1', width: 1, height: 1 },
+  { value: '2:3', label: '2:3', width: 2, height: 3 },
+  { value: '3:2', label: '3:2', width: 3, height: 2 },
+  { value: '3:4', label: '3:4', width: 3, height: 4 },
+  { value: '4:3', label: '4:3', width: 4, height: 3 },
+  { value: '9:16', label: '9:16', width: 9, height: 16 },
+  { value: '16:9', label: '16:9', width: 16, height: 9 },
+  { value: '21:9', label: '21:9', width: 21, height: 9 }
+]
+
+const bananaImageSizeOptions = ['1K', '2K', '4K'] as const
+
+const visibleAspectRatioOptions = computed(() => {
+  if (isBanana.value) return bananaAspectRatioOptions
+  return isGPT4K.value ? gptImage4KAspectRatioOptions : gptImageAspectRatioOptions
+})
 
 const countOptions = Array.from({ length: 10 }, (_, index) => index + 1)
 
@@ -1170,39 +1206,48 @@ const size = computed(() =>
       : ''
 )
 
+const requestSize = computed(() => (isBanana.value ? '' : size.value))
+
 const sizeValidationError = computed(() => {
   if (selectedImageProvider.value !== 'openai') return ''
-  return validateOpenAIImageSize(size.value, model.value)
+  return validateOpenAIImageSize(requestSize.value, model.value)
 })
 
 const selectedAspectRatioOption = computed(() =>
-  aspectRatioOptions.find((item) => item.value === selectedAspectRatio.value)
+  findAspectRatioOption(visibleAspectRatioOptions.value, selectedAspectRatio.value)
 )
 
 const sizeSummary = computed(() => {
   if (selectedAspectRatio.value === 'auto') return imageText('sizeAuto')
   const option = selectedAspectRatioOption.value
-  return option ? `${option.label} · ${size.value}` : size.value
+  if (!option) return requestSize.value
+  if (isBanana.value) return `${bananaImageSize.value} · ${option.label}`
+  if (!showSizeInputs.value) return option.label
+  return `${option.label} · ${size.value}`
 })
 
 const geminiAspectRatio = computed(() => {
+  if (!isBanana.value) return undefined
   const option = selectedAspectRatioOption.value
-  if (!option || option.value === 'auto') return undefined
-  return option.label.replace(/\(.+\)$/, '')
+  return option?.label
 })
 
 const geminiImageSize = computed(() => {
-  if (selectedImageProvider.value !== 'gemini') return undefined
-  if (!selectedGeminiAllowsImageSize.value) return undefined
-  const tier = selectedAspectRatioOption.value?.tier
-  if (tier === '2k') return '2K'
-  if (tier === '4k') return '4K'
-  return undefined
+  return isBanana.value ? bananaImageSize.value : undefined
 })
 
 const settingsSummary = computed(() => {
-  return `${qualityLabel(quality.value)} · ${sizeSummary.value} · ${imageText('imagesCount', { count: count.value })}`
+  const summary = `${sizeSummary.value} · ${imageText('imagesCount', { count: count.value })}`
+  return isBanana.value ? summary : `${qualityLabel(quality.value)} · ${summary}`
 })
+
+function turnSizeSummary(turn: Turn): string {
+  if (turn.displaySize) return turn.displaySize
+  if (turn.provider === 'gemini') {
+    return [turn.imageSize, turn.aspectRatio].filter(Boolean).join(' · ')
+  }
+  return turn.size === 'auto' ? imageText('sizeAuto') : turn.size
+}
 
 function imageDimensionValue(value: unknown): number | null {
   const number = Number(value)
@@ -1214,8 +1259,21 @@ function storedImageDimension(value: number): number {
   return Number.isFinite(dimension) && dimension > 0 ? dimension : 1024
 }
 
+function aspectRatioBase(value: string): string {
+  return value.replace(/-(?:1|2|4)k$/i, '')
+}
+
+function findAspectRatioOption(options: AspectRatioOption[], value: string): AspectRatioOption | undefined {
+  return (
+    options.find((option) => option.value === value) ??
+    options.find((option) => aspectRatioBase(option.value) === aspectRatioBase(value))
+  )
+}
+
 function matchAspectRatioValue(width: number, height: number): string {
-  const exact = aspectRatioOptions.find((option) => option.width === width && option.height === height)
+  const exact = visibleAspectRatioOptions.value.find(
+    (option) => option.width === width && option.height === height
+  )
   if (exact) return exact.value
   return 'custom'
 }
@@ -1235,7 +1293,7 @@ function applySizeString(value: string) {
 function selectAspectRatio(option: AspectRatioOption) {
   if (option.disabled) return
   selectedAspectRatio.value = option.value
-  if (option.value !== 'auto') {
+  if (!isBanana.value && option.value !== 'auto') {
     imageWidth.value = option.width
     imageHeight.value = option.height
   }
@@ -1266,10 +1324,16 @@ function aspectRatioIconStyle(option: AspectRatioOption): Record<string, string>
   }
 }
 
-watch([visibleAspectRatioOptions, selectedAspectRatio], ([options]) => {
-  if (selectedAspectRatio.value === 'custom') return
-  if (options.some((option) => option.value === selectedAspectRatio.value)) return
-  selectAspectRatio(options[0] ?? aspectRatioOptions[0])
+watch([visibleAspectRatioOptions, selectedAspectRatio, showSizeInputs, keysLoading], ([options]) => {
+  if (keysLoading.value) return
+  if (options.length === 0) return
+  if (showSizeInputs.value && selectedAspectRatio.value === 'custom') return
+  const option = findAspectRatioOption(options, selectedAspectRatio.value) ?? options[0]
+  const needsPresetSize =
+    !isBanana.value &&
+    !showSizeInputs.value &&
+    (imageWidth.value !== option.width || imageHeight.value !== option.height)
+  if (selectedAspectRatio.value !== option.value || needsPresetSize) selectAspectRatio(option)
 })
 
 function loadPrefs() {
@@ -1282,21 +1346,23 @@ function loadPrefs() {
       width: number
       height: number
       aspectRatio: string
+      bananaImageSize: string
       quality: string
       count: number
       keyId: number
     }>
     if (typeof prefs.model === 'string' && prefs.model) model.value = prefs.model
     if (typeof prefs.aspectRatio === 'string' && prefs.aspectRatio) {
-      const option = aspectRatioOptions.find((item) => item.value === prefs.aspectRatio)
-      if (option) selectAspectRatio(option)
+      selectedAspectRatio.value = prefs.aspectRatio
     } else if (typeof prefs.size === 'string' && prefs.size) {
       applySizeString(prefs.size)
     }
     if (typeof prefs.width === 'number' && typeof prefs.height === 'number') {
       imageWidth.value = storedImageDimension(prefs.width)
       imageHeight.value = storedImageDimension(prefs.height)
-      selectedAspectRatio.value = matchAspectRatioValue(imageWidth.value, imageHeight.value)
+    }
+    if (prefs.bananaImageSize === '1K' || prefs.bananaImageSize === '2K' || prefs.bananaImageSize === '4K') {
+      bananaImageSize.value = prefs.bananaImageSize
     }
     if (typeof prefs.quality === 'string' && prefs.quality) quality.value = prefs.quality
     if (typeof prefs.count === 'number' && prefs.count >= 1 && prefs.count <= 10) {
@@ -1308,16 +1374,17 @@ function loadPrefs() {
   }
 }
 
-watch([model, imageWidth, imageHeight, selectedAspectRatio, quality, count, selectedKeyId], () => {
+watch([model, imageWidth, imageHeight, selectedAspectRatio, bananaImageSize, quality, count, selectedKeyId], () => {
   try {
     localStorage.setItem(
       PREFS_STORAGE_KEY,
       JSON.stringify({
         model: model.value,
-        size: size.value,
+        size: requestSize.value,
         width: imageWidth.value,
         height: imageHeight.value,
         aspectRatio: selectedAspectRatio.value,
+        bananaImageSize: bananaImageSize.value,
         quality: quality.value,
         count: count.value,
         keyId: selectedKeyId.value ?? undefined
@@ -1595,6 +1662,7 @@ function turnToHistoryTurn(turn: Turn, results: StoredImage[]): HistoryTurn {
     model: turn.model,
     provider: turn.provider,
     size: turn.size,
+    displaySize: turn.displaySize,
     aspectRatio: turn.aspectRatio,
     imageSize: turn.imageSize,
     quality: turn.quality,
@@ -1655,6 +1723,7 @@ function historyTurnToTurn(historyTurn: HistoryTurn): Turn {
     model: historyTurn.model,
     provider: historyTurn.provider ?? providerForModelID(historyTurn.model),
     size: historyTurn.size,
+    displaySize: historyTurn.displaySize,
     aspectRatio: historyTurn.aspectRatio,
     imageSize: historyTurn.imageSize,
     quality: historyTurn.quality,
@@ -1714,7 +1783,7 @@ async function runTurn(turn: Turn) {
         size: turn.size,
         aspectRatio: turn.aspectRatio,
         imageSize: turn.imageSize,
-        quality: turn.quality,
+        ...(turn.provider === 'openai' ? { quality: turn.quality } : {}),
         referenceImages: turn.referenceImages
       },
       controller.signal
@@ -1766,7 +1835,8 @@ async function onSubmit() {
     prompt: trimmedPrompt,
     model: selectedModel,
     provider: selectedImageProvider.value,
-    size: size.value,
+    size: requestSize.value,
+    displaySize: sizeSummary.value,
     aspectRatio: geminiAspectRatio.value,
     imageSize: geminiImageSize.value,
     quality: quality.value,

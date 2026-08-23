@@ -772,7 +772,19 @@ func (h *AccountHandler) GetByID(c *gin.Context) {
 		}
 	}
 
-	response.Success(c, h.buildAccountResponseWithRuntime(c.Request.Context(), account))
+	result := h.buildAccountResponseWithRuntime(c.Request.Context(), account)
+	// Account detail intentionally exposes api_key for administrators; other sensitive
+	// credentials remain redacted by dto.AccountFromService.
+	if account != nil {
+		if apiKey, ok := account.Credentials["api_key"]; ok && result.Account != nil {
+			if result.Account.Credentials == nil {
+				result.Account.Credentials = make(map[string]any, 1)
+			}
+			result.Account.Credentials["api_key"] = apiKey
+		}
+	}
+
+	response.Success(c, result)
 }
 
 // CheckMixedChannel handles checking mixed channel risk for account-group binding.

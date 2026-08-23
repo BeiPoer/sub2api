@@ -416,7 +416,7 @@ func createGroupUsageRollupTriggerTestSchema(t *testing.T, ctx context.Context, 
 	tx, err := integrationDB.BeginTx(ctx, nil)
 	require.NoError(t, err)
 	defer func() { _ = tx.Rollback() }()
-	require.NoError(t, setGroupUsageRollupTriggerSearchPath(ctx, tx, quotedSchema))
+	require.NoError(t, configureGroupUsageRollupTriggerTestTx(ctx, tx, quotedSchema))
 
 	usageLogsDDL := `
 		CREATE TABLE usage_logs (
@@ -467,12 +467,15 @@ func beginGroupUsageRollupTriggerTestTx(t *testing.T, ctx context.Context, schem
 
 	tx, err := integrationDB.BeginTx(ctx, nil)
 	require.NoError(t, err)
-	require.NoError(t, setGroupUsageRollupTriggerSearchPath(ctx, tx, pq.QuoteIdentifier(schema)))
+	require.NoError(t, configureGroupUsageRollupTriggerTestTx(ctx, tx, pq.QuoteIdentifier(schema)))
 	return tx
 }
 
-func setGroupUsageRollupTriggerSearchPath(ctx context.Context, tx *sql.Tx, quotedSchema string) error {
-	_, err := tx.ExecContext(ctx, "SET LOCAL search_path TO "+quotedSchema)
+func configureGroupUsageRollupTriggerTestTx(ctx context.Context, tx *sql.Tx, quotedSchema string) error {
+	if _, err := tx.ExecContext(ctx, "SET LOCAL search_path TO "+quotedSchema); err != nil {
+		return err
+	}
+	_, err := tx.ExecContext(ctx, "SET LOCAL TIME ZONE 'Asia/Shanghai'")
 	return err
 }
 

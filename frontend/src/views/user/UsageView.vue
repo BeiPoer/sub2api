@@ -802,7 +802,7 @@ const handleColumnClickOutside = (event: MouseEvent) => {
 const loadFilterOptions = async () => {
   try {
     const [keys, availableGroups] = await Promise.all([
-      keysAPI.list(1, 100),
+      keysAPI.list(1, 500),
       userGroupsAPI.getAvailable(),
     ])
     apiKeys.value = keys.items

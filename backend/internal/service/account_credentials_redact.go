@@ -1,6 +1,7 @@
 package service
 
-// SensitiveCredentialKeys 列出 Account.Credentials JSON map 中绝不允许返回到前端的子键。
+// SensitiveCredentialKeys 列出 Account.Credentials JSON map 中默认脱敏的敏感子键。
+// 管理员账号读取接口可对明确允许的 api_key 做例外放行；其他接口仍应使用此清单脱敏。
 // dto 层做响应脱敏、service 层做更新合并都引用此清单——新增凭证类型时务必同步。
 var SensitiveCredentialKeys = []string{
 	// OAuth

@@ -200,7 +200,7 @@ type Account struct {
 	Platform string  `json:"platform"`
 	Type     string  `json:"type"`
 	// Credentials 通常经 RedactCredentials 处理后只含非敏感子键；敏感 token / 私钥的
-	// 存在性通过 CredentialsStatus（has_<key>）暴露。管理员账号详情 GET 响应会额外返回 api_key。
+	// 存在性通过 CredentialsStatus（has_<key>）暴露。管理员账号详情和列表 GET 响应会额外返回 api_key。
 	Credentials             map[string]any                 `json:"credentials"`
 	CredentialsStatus       map[string]bool                `json:"credentials_status,omitempty"`
 	Extra                   map[string]any                 `json:"extra"`

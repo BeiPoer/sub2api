@@ -223,6 +223,20 @@ func (h *AccountHandler) accountResponseFromService(account *service.Account) *d
 	return out
 }
 
+// includeAPIKeyInAccountResponse exposes only the account API key on top of the
+// standard redacted account response. Other sensitive credentials stay hidden.
+func includeAPIKeyInAccountResponse(out *dto.Account, account *service.Account) {
+	if out == nil || account == nil {
+		return
+	}
+	if apiKey, ok := account.Credentials["api_key"]; ok {
+		if out.Credentials == nil {
+			out.Credentials = make(map[string]any, 1)
+		}
+		out.Credentials["api_key"] = apiKey
+	}
+}
+
 func (h *AccountHandler) buildAccountResponseWithRuntime(ctx context.Context, account *service.Account) AccountWithConcurrency {
 	item := AccountWithConcurrency{
 		Account:            h.accountResponseFromService(account),
@@ -650,8 +664,12 @@ func (h *AccountHandler) List(c *gin.Context) {
 	result := make([]AccountWithConcurrency, len(accounts))
 	for i := range accounts {
 		acc := &accounts[i]
+		accountResponse := h.accountResponseFromService(acc)
+		// Account list responses expose api_key for administrators; other sensitive
+		// credentials remain redacted by dto.AccountFromService.
+		includeAPIKeyInAccountResponse(accountResponse, acc)
 		item := AccountWithConcurrency{
-			Account:            h.accountResponseFromService(acc),
+			Account:            accountResponse,
 			CurrentConcurrency: concurrencyCounts[acc.ID],
 			SchedulerScore:     schedulerScores[acc.ID],
 			SchedulerScores:    schedulerGroupScores[acc.ID],
@@ -775,14 +793,7 @@ func (h *AccountHandler) GetByID(c *gin.Context) {
 	result := h.buildAccountResponseWithRuntime(c.Request.Context(), account)
 	// Account detail intentionally exposes api_key for administrators; other sensitive
 	// credentials remain redacted by dto.AccountFromService.
-	if account != nil {
-		if apiKey, ok := account.Credentials["api_key"]; ok {
-			if result.Credentials == nil {
-				result.Credentials = make(map[string]any, 1)
-			}
-			result.Credentials["api_key"] = apiKey
-		}
-	}
+	includeAPIKeyInAccountResponse(result.Account, account)
 
 	response.Success(c, result)
 }

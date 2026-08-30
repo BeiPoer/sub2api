@@ -52,6 +52,45 @@ func TestAccountHandlerListIncludesCreatedAt(t *testing.T) {
 	require.Equal(t, 0, offset)
 }
 
+func TestAccountHandlerListReturnsAPIKey(t *testing.T) {
+	router, adminSvc := setupAccountListRouter()
+	adminSvc.accounts = []service.Account{
+		{
+			ID:       11,
+			Name:     "apikey-account",
+			Platform: service.PlatformOpenAI,
+			Type:     service.AccountTypeAPIKey,
+			Status:   service.StatusActive,
+			Credentials: map[string]any{
+				"api_key":       "sk-list-secret",
+				"refresh_token": "refresh-secret",
+				"base_url":      "https://api.example.com",
+			},
+		},
+	}
+
+	rec := httptest.NewRecorder()
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/admin/accounts?page=1&page_size=20", nil)
+	router.ServeHTTP(rec, req)
+
+	require.Equal(t, http.StatusOK, rec.Code)
+	var payload struct {
+		Data struct {
+			Items []struct {
+				Credentials       map[string]any  `json:"credentials"`
+				CredentialsStatus map[string]bool `json:"credentials_status"`
+			} `json:"items"`
+		} `json:"data"`
+	}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &payload))
+	require.Len(t, payload.Data.Items, 1)
+	require.Equal(t, "sk-list-secret", payload.Data.Items[0].Credentials["api_key"])
+	require.Equal(t, "https://api.example.com", payload.Data.Items[0].Credentials["base_url"])
+	require.NotContains(t, payload.Data.Items[0].Credentials, "refresh_token")
+	require.True(t, payload.Data.Items[0].CredentialsStatus["has_api_key"])
+	require.True(t, payload.Data.Items[0].CredentialsStatus["has_refresh_token"])
+}
+
 func TestAccountHandlerListReturnsSchedulerScoresPerGroup(t *testing.T) {
 	router, adminSvc := setupAccountListRouter()
 	now := time.Now().UTC()

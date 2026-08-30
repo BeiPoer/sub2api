@@ -227,6 +227,7 @@ func TestOllamaCloudUsageSharedStateMatchesListDetailAndSpecialEndpointWithoutLi
 		Data struct {
 			Items []struct {
 				ID               int64                          `json:"id"`
+				Credentials      map[string]any                 `json:"credentials"`
 				OllamaCloudUsage *service.OllamaCloudUsageState `json:"ollama_cloud_usage"`
 			} `json:"items"`
 		} `json:"data"`
@@ -234,6 +235,7 @@ func TestOllamaCloudUsageSharedStateMatchesListDetailAndSpecialEndpointWithoutLi
 	require.NoError(t, json.Unmarshal(listRecorder.Body.Bytes(), &listPayload))
 	require.Len(t, listPayload.Data.Items, 2)
 	for _, item := range listPayload.Data.Items {
+		require.Equal(t, "shared-secret-key", item.Credentials["api_key"])
 		require.True(t, item.OllamaCloudUsage.Configured)
 		require.Equal(t, "pro", item.OllamaCloudUsage.Snapshot.Data.Plan)
 	}
@@ -258,7 +260,6 @@ func TestOllamaCloudUsageSharedStateMatchesListDetailAndSpecialEndpointWithoutLi
 	require.NoError(t, json.Unmarshal(stateRecorder.Body.Bytes(), &statePayload))
 	require.Equal(t, statePayload.Data.Configured, detailPayload.Data.OllamaCloudUsage.Configured)
 	require.Equal(t, statePayload.Data.Snapshot, detailPayload.Data.OllamaCloudUsage.Snapshot)
-	require.NotContains(t, listRecorder.Body.String(), "shared-secret-key")
 	require.Equal(t, "shared-secret-key", detailPayload.Data.Credentials["api_key"])
 	require.NotContains(t, detailRecorder.Body.String(), "ciphertext-secret")
 	require.NotContains(t, stateRecorder.Body.String(), "shared-secret-key")

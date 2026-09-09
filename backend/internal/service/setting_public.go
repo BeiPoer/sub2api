@@ -666,7 +666,7 @@ type PublicSettingsInjectionPayload struct {
 	// monitors; fail-closed (absent/false = hidden). Admin UI always shows it.
 	// ChannelMonitorHideUserRanking hides the user ranking tab and /users payload
 	// from non-admin channel-monitor v2 viewers; default false (visible).
-	ChannelMonitorHideUserRanking bool `json:"channel_monitor_hide_user_ranking"`
+	ChannelMonitorHideUserRanking bool    `json:"channel_monitor_hide_user_ranking"`
 	ChannelMonitorShowQuota       bool    `json:"channel_monitor_show_quota"`
 	AvailableChannelsEnabled      bool    `json:"available_channels_enabled"`
 	ModelPlazaEnabled             bool    `json:"model_plaza_enabled"`

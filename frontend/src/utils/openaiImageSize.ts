@@ -5,7 +5,7 @@ const GPT_IMAGE_2_MAX_EDGE = 3840
 
 function isGPTImage2Model(model: string): boolean {
   const id = model.trim().toLowerCase()
-  return id === 'gpt-image-2' || id.startsWith('gpt-image-2-')
+  return id.startsWith('gpt-image-')
 }
 
 function parseImageSize(size: string): { width: number; height: number } | null {

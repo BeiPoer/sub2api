@@ -9,8 +9,8 @@ describe('validateOpenAIImageSize', () => {
     expect(validateOpenAIImageSize('auto', 'gpt-image-1')).toBe('')
   })
 
-  it('rejects custom sizes for older GPT image models', () => {
-    expect(validateOpenAIImageSize('2048x2048', 'gpt-image-1')).toContain('仅支持')
+  it('rejects custom sizes for non-GPT image models', () => {
+    expect(validateOpenAIImageSize('2048x2048', 'grok-imagine')).toContain('仅支持')
   })
 
   it('allows valid custom gpt-image-2 sizes', () => {
@@ -19,6 +19,7 @@ describe('validateOpenAIImageSize', () => {
     expect(validateOpenAIImageSize('2880x2880', 'gpt-image-2')).toBe('')
     expect(validateOpenAIImageSize('3840x2160', 'gpt-image-2')).toBe('')
     expect(validateOpenAIImageSize('2160x3840', 'gpt-image-2')).toBe('')
+    expect(validateOpenAIImageSize('3840x2160', 'gpt-image-2.5-flare')).toBe('')
   })
 
   it('rejects invalid gpt-image-2 custom sizes', () => {

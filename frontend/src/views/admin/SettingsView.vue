@@ -6313,6 +6313,26 @@
                 </div>
               </div>
 
+              <fieldset class="space-y-3">
+                <legend class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ t('admin.settings.site.skin') }}</legend>
+                <p class="text-xs text-gray-500 dark:text-gray-400">{{ t('admin.settings.site.skinHint') }}</p>
+                <div class="grid gap-3 sm:grid-cols-2">
+                  <label v-for="skin in siteSkins" :key="skin.value"
+                    class="flex cursor-pointer items-start gap-3 rounded-lg border p-4"
+                    :class="(form.site_skin || 'default') === skin.value ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20' : 'border-gray-200 dark:border-dark-700'">
+                    <input v-model="form.site_skin" type="radio" name="site-skin" :value="skin.value" class="mt-1 accent-primary-600" />
+                    <span class="min-w-0 flex-1">
+                      <span class="block text-sm font-semibold">{{ t(skin.label) }}</span>
+                      <span class="mt-1 block text-xs text-gray-600 dark:text-gray-400">{{ t(skin.description) }}</span>
+                      <span class="mt-3 flex gap-1.5" aria-hidden="true">
+                        <span v-for="color in skin.colors"
+                          :key="color" class="h-5 w-8 rounded border border-black/10" :style="{ backgroundColor: color }" />
+                      </span>
+                    </span>
+                  </label>
+                </div>
+              </fieldset>
+
               <!-- API Base URL -->
               <div>
                 <label
@@ -8776,6 +8796,7 @@
 </template>
 
 <script setup lang="ts">
+import { siteSkins } from '@/utils/siteSkin'
 import { ref, reactive, computed, onMounted, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { adminAPI } from "@/api";
@@ -9575,6 +9596,7 @@ const form = reactive<SettingsForm>({
   site_name: "Sub2API",
   site_logo: "",
   site_subtitle: "Subscription to API Conversion Platform",
+  site_skin: "default",
   api_base_url: "",
   contact_info: "",
   doc_url: "",
@@ -11211,6 +11233,7 @@ async function saveSettings() {
       site_name: form.site_name,
       site_logo: form.site_logo,
       site_subtitle: form.site_subtitle,
+      site_skin: form.site_skin || "default",
       api_base_url: form.api_base_url,
       contact_info: form.contact_info,
       doc_url: form.doc_url,
@@ -12828,7 +12851,7 @@ const affiliateModalCanSubmit = computed(() => {
   const codeFilled = affiliateModal.code.trim() !== "";
   const rateFilled = String(affiliateModal.rate ?? "").trim() !== "";
   if (codeFilled || rateFilled) return true;
-  // Edit mode + empty rate input is a meaningful "clear" only if the user
+  // Edit mode + empty rate input is a meaningful  only if the user
   // currently has an exclusive rate to clear.
   return (
     affiliateModal.mode === "edit" &&

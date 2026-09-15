@@ -104,7 +104,7 @@
       class="flex flex-col items-center gap-4 sm:flex-row sm:gap-6"
     >
       <div class="h-48 w-48 shrink-0">
-        <Doughnut :data="chartData" :options="doughnutOptions" />
+        <Doughnut :data="chartData" :options="skinOptions(doughnutOptions)" />
       </div>
       <div class="max-h-48 w-full min-w-0 flex-1 overflow-auto">
         <table class="w-full text-xs">
@@ -184,7 +184,7 @@
     </div>
     <div v-else-if="rankingDisplayItems.length > 0 && rankingChartData" class="flex flex-col items-center gap-4 sm:flex-row sm:gap-6">
       <div class="h-48 w-48 shrink-0">
-        <Doughnut :data="rankingChartData" :options="rankingDoughnutOptions" />
+        <Doughnut :data="rankingChartData" :options="skinOptions(rankingDoughnutOptions)" />
       </div>
       <div class="max-h-48 w-full min-w-0 flex-1 overflow-auto">
         <table class="w-full text-xs">
@@ -243,6 +243,9 @@
 </template>
 
 <script setup lang="ts">
+import { useChartSkin } from '@/composables/useChartSkin'
+const { skinOptions } = useChartSkin()
+
 import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js'

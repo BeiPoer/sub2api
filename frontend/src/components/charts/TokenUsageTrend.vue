@@ -7,7 +7,7 @@
       <LoadingSpinner />
     </div>
     <div v-else-if="trendData.length > 0 && chartData" class="h-48">
-      <Line :data="chartData" :options="lineOptions" />
+      <Line :data="chartData" :options="skinOptions(lineOptions)" />
     </div>
     <div
       v-else
@@ -19,6 +19,9 @@
 </template>
 
 <script setup lang="ts">
+import { useChartSkin } from '@/composables/useChartSkin'
+const { skinOptions } = useChartSkin()
+
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {

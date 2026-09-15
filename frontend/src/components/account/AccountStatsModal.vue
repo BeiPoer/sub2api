@@ -434,7 +434,7 @@
             {{ t('admin.accounts.stats.usageTrend') }}
           </h3>
           <div class="h-64">
-            <Line v-if="trendChartData" :data="trendChartData" :options="lineChartOptions" />
+            <Line v-if="trendChartData" :data="trendChartData" :options="skinOptions(lineChartOptions)" />
             <div
               v-else
               class="flex h-full items-center justify-center text-sm text-gray-500 dark:text-gray-400"
@@ -484,6 +484,9 @@
 </template>
 
 <script setup lang="ts">
+import { useChartSkin } from '@/composables/useChartSkin'
+const { skinOptions } = useChartSkin()
+
 import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import {

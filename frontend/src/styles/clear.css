@@ -1,0 +1,74 @@
+/* Clear Blue skin, scoped to the site skin selection. */
+html[data-skin="clear"] {
+  --color-primary-50: 239 245 255;
+  --color-primary-100: 220 236 255;
+  --color-primary-200: 186 217 255;
+  --color-primary-300: 139 192 255;
+  --color-primary-400: 88 162 255;
+  --color-primary-500: 7 111 238;
+  --color-primary-600: 0 99 213;
+  --color-primary-700: 6 82 173;
+  --color-primary-800: 11 68 139;
+  --color-primary-900: 16 58 112;
+  --color-primary-950: 11 35 68;
+  --color-gray-50: 239 245 255;
+  --color-gray-100: 240 242 247;
+  --color-gray-200: 224 229 237;
+  --color-gray-300: 197 204 214;
+  --color-gray-400: 104 115 132;
+  --color-gray-500: 99 109 125;
+  --color-gray-600: 76 86 103;
+  --color-gray-700: 54 65 83;
+  --color-gray-800: 41 52 69;
+  --color-gray-900: 23 32 51;
+  --color-gray-950: 16 24 40;
+  --paper: #eff5ff;
+  --panel: #ffffff;
+  --ink: #172033;
+  --muted: #636d7d;
+  --rule: #e0e5ed;
+  --wash: #f0f1ff;
+  --mark: #076fee;
+  --on-mark: #ffffff;
+  --skin-radius-lg: 8px;
+  --skin-radius-xl: 12px;
+  --skin-radius-2xl: 20px;
+  --skin-radius-3xl: 20px;
+  --skin-radius-4xl: 24px;
+}
+
+html[data-skin="clear"].dark {
+  --paper: #181818;
+  --panel: #121827;
+  --ink: #eef2f8;
+  --muted: #a3b0c4;
+  --rule: #303b4d;
+  --wash: #242c3c;
+  --mark: #65adff;
+  --on-mark: #101828;
+}
+
+html[data-skin="clear"] body { background: var(--paper); color: var(--ink); }
+html[data-skin="clear"] :is(.card, .card-glass, .glass-card, .modal-content, .table-container) {
+  background: var(--panel);
+  border-color: var(--rule);
+  border-radius: var(--skin-radius-2xl);
+  box-shadow: 0 1px 2px rgb(16 24 40 / 4%);
+}
+html[data-skin="clear"] :is(.btn-primary, .sidebar-link-active) { background: var(--mark); color: var(--on-mark); }
+html[data-skin="clear"] .sidebar-link-active { box-shadow: none; }
+html[data-skin="clear"] :is(.btn, .input) { border-radius: var(--skin-radius-lg); }
+html[data-skin="clear"] :is(.page-title, .modal-title, .card-title, .auth-brand h1, .site-home h1) {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+html[data-skin="clear"] :is(.btn, .sidebar-link, .settings-tab-active, .table th) {
+  font-weight: 600;
+}
+html[data-skin="clear"] :is(.stat-value, .amount, .price) {
+  font-weight: 700;
+}
+/* Clear keeps the reference hierarchy even when views use Tailwind utility classes. */
+html[data-skin="clear"] :is([class~="font-bold"], [class~="font-black"]) { font-weight: 700; }
+html[data-skin="clear"] [class~="font-semibold"] { font-weight: 600; }
+html[data-skin="clear"] :is(h1, h2, h3, h4, strong) { font-weight: 700; }

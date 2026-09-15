@@ -99,6 +99,9 @@ func (s *SettingService) refreshCachedSettingsAfterWrite(ctx context.Context, se
 }
 
 func (s *SettingService) buildSystemSettingsUpdates(ctx context.Context, settings *SystemSettings) (map[string]string, error) {
+	if settings.SiteSkin != "" && normalizeSiteSkin(settings.SiteSkin) != settings.SiteSkin {
+		return nil, infraerrors.BadRequest("INVALID_SITE_SKIN", "site_skin must be default, editorial, fantasy, caramellatte, flexfolio, aiwork, agentory, rescale, clear, press, outline, workspace, instrument, folio, softblock, bluehour, swiss or ribbon")
+	}
 	if err := s.validateDefaultSubscriptionGroups(ctx, settings.DefaultSubscriptions); err != nil {
 		return nil, err
 	}
@@ -339,6 +342,7 @@ func (s *SettingService) buildSystemSettingsUpdates(ctx context.Context, setting
 	updates[SettingKeySiteName] = settings.SiteName
 	updates[SettingKeySiteLogo] = settings.SiteLogo
 	updates[SettingKeySiteSubtitle] = settings.SiteSubtitle
+	updates[SettingKeySiteSkin] = normalizeSiteSkin(settings.SiteSkin)
 	updates[SettingKeyAPIBaseURL] = settings.APIBaseURL
 	updates[SettingKeyContactInfo] = settings.ContactInfo
 	updates[SettingKeyDocURL] = settings.DocURL

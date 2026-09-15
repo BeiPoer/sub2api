@@ -1,3 +1,4 @@
+import { normalizeSiteSkin } from '@/utils/siteSkin'
 /**
  * Application State Store
  * Manages global UI state including sidebar, loading indicators, and toast notifications
@@ -293,6 +294,7 @@ export const useAppStore = defineStore('app', () => {
     if (typeof window !== 'undefined') {
       window.__APP_CONFIG__ = { ...config }
     }
+    document.documentElement.dataset.skin = normalizeSiteSkin(config.site_skin)
     cachedPublicSettings.value = config
     siteName.value = config.site_name || 'Sub2API'
     siteLogo.value = config.site_logo || ''

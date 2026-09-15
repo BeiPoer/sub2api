@@ -317,6 +317,9 @@ func diffSettings(before *service.SystemSettings, after *service.SystemSettings,
 	if before.OIDCConnectUserInfoUsernamePath != after.OIDCConnectUserInfoUsernamePath {
 		changed = append(changed, "oidc_connect_userinfo_username_path")
 	}
+	if before.SiteSkin != after.SiteSkin {
+		changed = append(changed, "site_skin")
+	}
 	if before.SiteName != after.SiteName {
 		changed = append(changed, "site_name")
 	}

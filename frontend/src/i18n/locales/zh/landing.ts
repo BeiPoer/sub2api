@@ -1,4 +1,9 @@
 export default {
+  editorial: {
+    edition: '通往模型的另一种方式',
+    example: 'API 调用示例',
+    welcome: '从这里，开始创造。',
+  },
   batchImageGuide: {
     title: '图片批量生成',
     description: '一次提交多条提示词，任务完成后可统一下载图片结果'

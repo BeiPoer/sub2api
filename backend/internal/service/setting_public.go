@@ -183,6 +183,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		SettingKeySiteName,
 		SettingKeySiteLogo,
 		SettingKeySiteSubtitle,
+		SettingKeySiteSkin,
 		SettingKeyAPIBaseURL,
 		SettingKeyContactInfo,
 		SettingKeyDocURL,
@@ -325,6 +326,7 @@ func (s *SettingService) GetPublicSettings(ctx context.Context) (*PublicSettings
 		SiteName:                            s.getStringOrDefault(settings, SettingKeySiteName, "Sub2API"),
 		SiteLogo:                            settings[SettingKeySiteLogo],
 		SiteSubtitle:                        s.getStringOrDefault(settings, SettingKeySiteSubtitle, "Subscription to API Conversion Platform"),
+		SiteSkin:                            normalizeSiteSkin(settings[SettingKeySiteSkin]),
 		APIBaseURL:                          settings[SettingKeyAPIBaseURL],
 		ContactInfo:                         settings[SettingKeyContactInfo],
 		DocURL:                              settings[SettingKeyDocURL],
@@ -620,6 +622,7 @@ type PublicSettingsInjectionPayload struct {
 	SiteName                            string                   `json:"site_name"`
 	SiteLogo                            string                   `json:"site_logo"`
 	SiteSubtitle                        string                   `json:"site_subtitle"`
+	SiteSkin                            string                   `json:"site_skin"`
 	APIBaseURL                          string                   `json:"api_base_url"`
 	ContactInfo                         string                   `json:"contact_info"`
 	DocURL                              string                   `json:"doc_url"`
@@ -717,6 +720,7 @@ func (s *SettingService) GetPublicSettingsForInjection(ctx context.Context) (any
 		SiteName:                            settings.SiteName,
 		SiteLogo:                            settings.SiteLogo,
 		SiteSubtitle:                        settings.SiteSubtitle,
+		SiteSkin:                            settings.SiteSkin,
 		APIBaseURL:                          settings.APIBaseURL,
 		ContactInfo:                         settings.ContactInfo,
 		DocURL:                              settings.DocURL,
@@ -890,4 +894,12 @@ func parseCustomMenuItemURLs(raw string) []string {
 		}
 	}
 	return urls
+}
+
+// Unknown stored values use the original skin for backwards compatibility.
+func normalizeSiteSkin(value string) string {
+	if value == "editorial" || value == "fantasy" || value == "caramellatte" || value == "flexfolio" || value == "aiwork" || value == "agentory" || value == "rescale" || value == "clear" || value == "press" || value == "outline" || value == "workspace" || value == "instrument" || value == "folio" || value == "softblock" || value == "bluehour" || value == "swiss" || value == "ribbon" {
+		return value
+	}
+	return "default"
 }

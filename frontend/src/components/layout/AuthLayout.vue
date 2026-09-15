@@ -1,12 +1,12 @@
 <template>
-  <div class="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
+  <div class="auth-layout relative flex min-h-screen items-center justify-center overflow-hidden p-4">
     <!-- Background -->
     <div
-      class="absolute inset-0 bg-gradient-to-br from-gray-50 via-primary-50/30 to-gray-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950"
+      class="skin-decoration absolute inset-0 bg-gradient-to-br from-gray-50 via-primary-50/30 to-gray-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950"
     ></div>
 
     <!-- Decorative Elements -->
-    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+    <div class="skin-decoration pointer-events-none absolute inset-0 overflow-hidden">
       <!-- Gradient Orbs -->
       <div
         class="absolute -right-40 -top-40 h-80 w-80 rounded-full bg-primary-400/20 blur-3xl"
@@ -25,9 +25,9 @@
     </div>
 
     <!-- Content Container -->
-    <div class="relative z-10 w-full max-w-md">
+    <div class="auth-shell relative z-10 w-full max-w-md">
       <!-- Logo/Brand -->
-      <div class="mb-8 text-center">
+      <div class="auth-brand mb-8 text-center">
         <!-- Custom Logo or Default Logo -->
         <template v-if="settingsLoaded">
           <div
@@ -35,6 +35,7 @@
           >
             <img :src="siteLogo || '/logo.svg'" alt="Logo" class="h-full w-full object-contain" />
           </div>
+          <p v-if="normalizeSiteSkin(appStore.cachedPublicSettings?.site_skin) !== 'default'" class="editorial-eyebrow">{{ t('editorial.welcome') }}</p>
           <h1 class="text-gradient mb-2 text-3xl font-bold">
             {{ siteName }}
           </h1>
@@ -45,17 +46,17 @@
       </div>
 
       <!-- Card Container -->
-      <div class="card-glass rounded-2xl p-8 shadow-glass">
+      <div class="auth-form card-glass rounded-2xl p-8 shadow-glass">
         <slot />
       </div>
 
       <!-- Footer Links -->
-      <div class="mt-6 text-center text-sm">
+      <div class="auth-links mt-6 text-center text-sm">
         <slot name="footer" />
       </div>
 
       <!-- Copyright -->
-      <div class="mt-8 text-center text-xs text-gray-400 dark:text-dark-500">
+      <div class="auth-copyright mt-8 text-center text-xs text-gray-400 dark:text-dark-500">
         &copy; {{ currentYear }} {{ siteName }}. All rights reserved.
       </div>
     </div>
@@ -63,11 +64,14 @@
 </template>
 
 <script setup lang="ts">
+import { normalizeSiteSkin } from '@/utils/siteSkin'
 import { computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAppStore } from '@/stores'
 import { sanitizeUrl } from '@/utils/url'
 
 const appStore = useAppStore()
+const { t } = useI18n()
 
 const siteName = computed(() => appStore.siteName || 'Sub2API')
 const siteLogo = computed(() => sanitizeUrl(appStore.siteLogo || '', { allowRelative: true, allowDataUrl: true }))

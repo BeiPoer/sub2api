@@ -1,4 +1,9 @@
 export default {
+  editorial: {
+    edition: 'A different way to connect',
+    example: 'Example API request',
+    welcome: 'Make room for your next idea.',
+  },
   batchImageGuide: {
     title: 'Batch Image Generation',
     description: 'Submit multiple prompts in one job and download the generated images when complete'

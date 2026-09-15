@@ -1,3 +1,5 @@
+import colors from 'tailwindcss/colors'
+
 /** @type {import('tailwindcss').Config} */
 export default {
   content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
@@ -5,52 +7,57 @@ export default {
   theme: {
     extend: {
       colors: {
+        white: 'rgb(var(--color-white, 255 255 255) / <alpha-value>)',
+        gray: Object.fromEntries(Object.entries(colors.gray).map(([shade, hex]) => [
+          shade,
+          `rgb(var(--color-gray-${shade}, ${hex.slice(1).match(/../g).map(value => parseInt(value, 16)).join(' ')}) / <alpha-value>)`
+        ])),
         // 主色调 - Teal/Cyan 青色系
         primary: {
-          50: '#f0fdfa',
-          100: '#ccfbf1',
-          200: '#99f6e4',
-          300: '#5eead4',
-          400: '#2dd4bf',
-          500: '#14b8a6',
-          600: '#0d9488',
-          700: '#0f766e',
-          800: '#115e59',
-          900: '#134e4a',
-          950: '#042f2e'
+          50: 'rgb(var(--color-primary-50, 240 253 250) / <alpha-value>)',
+          100: 'rgb(var(--color-primary-100, 204 251 241) / <alpha-value>)',
+          200: 'rgb(var(--color-primary-200, 153 246 228) / <alpha-value>)',
+          300: 'rgb(var(--color-primary-300, 94 234 212) / <alpha-value>)',
+          400: 'rgb(var(--color-primary-400, 45 212 191) / <alpha-value>)',
+          500: 'rgb(var(--color-primary-500, 20 184 166) / <alpha-value>)',
+          600: 'rgb(var(--color-primary-600, 13 148 136) / <alpha-value>)',
+          700: 'rgb(var(--color-primary-700, 15 118 110) / <alpha-value>)',
+          800: 'rgb(var(--color-primary-800, 17 94 89) / <alpha-value>)',
+          900: 'rgb(var(--color-primary-900, 19 78 74) / <alpha-value>)',
+          950: 'rgb(var(--color-primary-950, 4 47 46) / <alpha-value>)'
         },
         // 辅助色 - 深蓝灰
         accent: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617'
+          50: 'rgb(var(--color-accent-50, 248 250 252) / <alpha-value>)',
+          100: 'rgb(var(--color-accent-100, 241 245 249) / <alpha-value>)',
+          200: 'rgb(var(--color-accent-200, 226 232 240) / <alpha-value>)',
+          300: 'rgb(var(--color-accent-300, 203 213 225) / <alpha-value>)',
+          400: 'rgb(var(--color-accent-400, 148 163 184) / <alpha-value>)',
+          500: 'rgb(var(--color-accent-500, 100 116 139) / <alpha-value>)',
+          600: 'rgb(var(--color-accent-600, 71 85 105) / <alpha-value>)',
+          700: 'rgb(var(--color-accent-700, 51 65 85) / <alpha-value>)',
+          800: 'rgb(var(--color-accent-800, 30 41 59) / <alpha-value>)',
+          900: 'rgb(var(--color-accent-900, 15 23 42) / <alpha-value>)',
+          950: 'rgb(var(--color-accent-950, 2 6 23) / <alpha-value>)'
         },
         // 深色模式背景
         dark: {
-          50: '#f8fafc',
-          100: '#f1f5f9',
-          200: '#e2e8f0',
-          300: '#cbd5e1',
-          400: '#94a3b8',
-          500: '#64748b',
-          600: '#475569',
-          700: '#334155',
-          800: '#1e293b',
-          900: '#0f172a',
-          950: '#020617'
+          50: 'rgb(var(--color-dark-50, 248 250 252) / <alpha-value>)',
+          100: 'rgb(var(--color-dark-100, 241 245 249) / <alpha-value>)',
+          200: 'rgb(var(--color-dark-200, 226 232 240) / <alpha-value>)',
+          300: 'rgb(var(--color-dark-300, 203 213 225) / <alpha-value>)',
+          400: 'rgb(var(--color-dark-400, 148 163 184) / <alpha-value>)',
+          500: 'rgb(var(--color-dark-500, 100 116 139) / <alpha-value>)',
+          600: 'rgb(var(--color-dark-600, 71 85 105) / <alpha-value>)',
+          700: 'rgb(var(--color-dark-700, 51 65 85) / <alpha-value>)',
+          800: 'rgb(var(--color-dark-800, 30 41 59) / <alpha-value>)',
+          900: 'rgb(var(--color-dark-900, 15 23 42) / <alpha-value>)',
+          950: 'rgb(var(--color-dark-950, 2 6 23) / <alpha-value>)'
         }
       },
       fontFamily: {
         sans: [
-          'system-ui',
+          'var(--skin-font-sans, system-ui)',
           '-apple-system',
           'BlinkMacSystemFont',
           'Segoe UI',
@@ -126,7 +133,11 @@ export default {
         xs: '2px'
       },
       borderRadius: {
-        '4xl': '2rem'
+        lg: 'var(--skin-radius-lg, 0.5rem)',
+        xl: 'var(--skin-radius-xl, 0.75rem)',
+        '2xl': 'var(--skin-radius-2xl, 1rem)',
+        '3xl': 'var(--skin-radius-3xl, 1.5rem)',
+        '4xl': 'var(--skin-radius-4xl, 2rem)'
       }
     }
   },

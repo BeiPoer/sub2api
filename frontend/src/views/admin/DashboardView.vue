@@ -325,7 +325,7 @@
               <div v-if="userTrendLoading" class="flex h-full items-center justify-center">
                 <LoadingSpinner size="md" />
               </div>
-              <Line v-else-if="userTrendChartData" :data="userTrendChartData" :options="lineOptions" />
+              <Line v-else-if="userTrendChartData" :data="userTrendChartData" :options="skinOptions(lineOptions)" />
               <div
                 v-else
                 class="flex h-full items-center justify-center text-sm text-gray-500 dark:text-gray-400"
@@ -341,6 +341,9 @@
 </template>
 
 <script setup lang="ts">
+import { useChartSkin } from '@/composables/useChartSkin'
+const { skinOptions } = useChartSkin()
+
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'

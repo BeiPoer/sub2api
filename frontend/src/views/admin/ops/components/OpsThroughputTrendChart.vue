@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import { useChartSkin } from '@/composables/useChartSkin'
+const { skinOptions } = useChartSkin()
+
 import { computed, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Chart as ChartJS, CategoryScale, Filler, Legend, LineElement, LinearScale, PointElement, Title, Tooltip } from 'chart.js'
@@ -251,7 +254,7 @@ function downloadChart() {
     </div>
 
     <div class="min-h-0 min-w-0 flex-1">
-      <Line v-if="state === 'ready' && chartData" ref="throughputChartRef" :data="chartData" :options="options" />
+      <Line v-if="state === 'ready' && chartData" ref="throughputChartRef" :data="chartData" :options="skinOptions(options)" />
       <div v-else class="flex h-full items-center justify-center">
         <div v-if="state === 'loading'" class="animate-pulse text-sm text-gray-400">{{ t('common.loading') }}</div>
         <EmptyState v-else :title="t('common.noData')" :description="t('admin.ops.charts.emptyRequest')" />

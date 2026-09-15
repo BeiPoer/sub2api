@@ -45,7 +45,7 @@
         class="h-[280px] sm:h-[300px]"
         @wheel="onChartWheel"
       >
-        <Line :data="chartData" :options="chartOptions" />
+        <Line :data="chartData" :options="skinOptions(chartOptions)" />
       </div>
       <div v-else class="flex h-[280px] items-center justify-center sm:h-[300px]">
         <EmptyState
@@ -58,6 +58,9 @@
 </template>
 
 <script setup lang="ts">
+import { useChartSkin } from '@/composables/useChartSkin'
+const { skinOptions } = useChartSkin()
+
 import { useI18n } from 'vue-i18n'
 import { computed, ref, watch } from 'vue'
 import {

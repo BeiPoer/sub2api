@@ -1,6 +1,6 @@
 <template>
   <!-- Custom Home Content: Full Page Mode -->
-  <div v-if="hasHomeContent" class="min-h-screen">
+  <div v-if="hasHomeContent" class="custom-home min-h-screen">
     <!-- iframe mode -->
     <iframe
       v-if="isHomeContentUrl"
@@ -16,7 +16,7 @@
   <div
     v-else-if="compactHomeEnabled"
     data-testid="compact-home"
-    class="flex min-h-screen flex-col bg-gray-50 text-gray-900 dark:bg-dark-950 dark:text-white"
+    class="site-home compact-home flex min-h-screen flex-col bg-gray-50 text-gray-900 dark:bg-dark-950 dark:text-white"
   >
     <header class="border-b border-gray-200 px-4 py-4 sm:px-6 dark:border-dark-800">
       <nav class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 sm:gap-4">
@@ -93,10 +93,10 @@
   <!-- Default Home Page -->
   <div
     v-else
-    class="relative flex min-h-screen flex-col overflow-hidden bg-gradient-to-br from-gray-50 via-primary-50/30 to-gray-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950"
+    class="site-home relative flex min-h-screen flex-col overflow-hidden bg-gradient-to-br from-gray-50 via-primary-50/30 to-gray-100 dark:from-dark-950 dark:via-dark-900 dark:to-dark-950"
   >
     <!-- Background Decorations -->
-    <div class="pointer-events-none absolute inset-0 overflow-hidden">
+    <div class="skin-decoration pointer-events-none absolute inset-0 overflow-hidden">
       <div
         class="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-primary-400/20 blur-3xl"
       ></div>
@@ -203,9 +203,10 @@
     <main class="relative z-10 flex-1 px-6 py-16">
       <div class="mx-auto max-w-6xl">
         <!-- Hero Section - Left/Right Layout -->
-        <div class="mb-12 flex flex-col items-center justify-between gap-12 lg:flex-row lg:gap-16">
+        <div class="home-hero mb-12 flex flex-col items-center justify-between gap-12 lg:flex-row lg:gap-16">
           <!-- Left: Text Content -->
-          <div class="flex-1 text-center lg:text-left">
+          <div class="home-intro flex-1 text-center lg:text-left">
+            <p v-if="normalizeSiteSkin(appStore.cachedPublicSettings?.site_skin) !== 'default'" class="editorial-eyebrow">{{ t('editorial.edition') }}</p>
             <h1
               class="mb-4 text-4xl font-bold text-gray-900 dark:text-white md:text-5xl lg:text-6xl"
             >
@@ -228,7 +229,7 @@
           </div>
 
           <!-- Right: Terminal Animation -->
-          <div class="flex flex-1 justify-center lg:justify-end">
+          <div class="home-example flex flex-1 justify-center lg:justify-end">
             <div class="terminal-container">
               <div class="terminal-window">
                 <!-- Window header -->
@@ -238,7 +239,7 @@
                     <span class="btn-minimize"></span>
                     <span class="btn-maximize"></span>
                   </div>
-                  <span class="terminal-title">terminal</span>
+                  <span class="terminal-title">{{ normalizeSiteSkin(appStore.cachedPublicSettings?.site_skin) !== 'default' ? t('editorial.example') : 'terminal' }}</span>
                 </div>
                 <!-- Terminal content -->
                 <div class="terminal-body">
@@ -266,7 +267,7 @@
         </div>
 
         <!-- Feature Tags - Centered -->
-        <div class="mb-12 flex flex-wrap items-center justify-center gap-4 md:gap-6">
+        <div class="home-tags mb-12 flex flex-wrap items-center justify-center gap-4 md:gap-6">
           <div
             class="inline-flex items-center gap-2.5 rounded-full border border-gray-200/50 bg-white/80 px-5 py-2.5 shadow-sm backdrop-blur-sm dark:border-dark-700/50 dark:bg-dark-800/80"
           >
@@ -294,7 +295,7 @@
         </div>
 
         <!-- Features Grid -->
-        <div class="mb-12 grid gap-6 md:grid-cols-3">
+        <div class="home-features mb-12 grid gap-6 md:grid-cols-3">
           <!-- Feature 1: Unified Gateway -->
           <div
             class="group rounded-2xl border border-gray-200/50 bg-white/60 p-6 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary-500/10 dark:border-dark-700/50 dark:bg-dark-800/60"
@@ -494,6 +495,7 @@
 </template>
 
 <script setup lang="ts">
+import { normalizeSiteSkin } from '@/utils/siteSkin'
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useAuthStore, useAppStore } from '@/stores'

@@ -1,3 +1,4 @@
+import type { SiteSkin } from '@/utils/siteSkin'
 /**
  * Admin Settings API endpoints
  * Handles system settings management for administrators
@@ -477,6 +478,7 @@ export interface SystemSettings {
   site_name: string;
   site_logo: string;
   site_subtitle: string;
+  site_skin?: SiteSkin;
   api_base_url: string;
   contact_info: string;
   doc_url: string;
@@ -818,6 +820,7 @@ export interface UpdateSettingsRequest {
   site_name?: string;
   site_logo?: string;
   site_subtitle?: string;
+  site_skin?: SiteSkin;
   api_base_url?: string;
   contact_info?: string;
   doc_url?: string;

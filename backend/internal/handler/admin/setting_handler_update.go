@@ -156,6 +156,7 @@ type UpdateSettingsRequest struct {
 	SiteName                    string                `json:"site_name"`
 	SiteLogo                    string                `json:"site_logo"`
 	SiteSubtitle                string                `json:"site_subtitle"`
+	SiteSkin                    string                `json:"site_skin"`
 	APIBaseURL                  string                `json:"api_base_url"`
 	ContactInfo                 string                `json:"contact_info"`
 	DocURL                      string                `json:"doc_url"`
@@ -489,6 +490,10 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 	var req UpdateSettingsRequest
 	if err := c.ShouldBindBodyWith(&req, binding.JSON); err != nil {
 		response.BadRequest(c, "Invalid request: "+err.Error())
+		return
+	}
+	if _, sent := sentFields["site_skin"]; sent && req.SiteSkin != "default" && req.SiteSkin != "editorial" && req.SiteSkin != "fantasy" && req.SiteSkin != "caramellatte" && req.SiteSkin != "flexfolio" && req.SiteSkin != "aiwork" && req.SiteSkin != "agentory" && req.SiteSkin != "rescale" && req.SiteSkin != "clear" && req.SiteSkin != "press" && req.SiteSkin != "outline" && req.SiteSkin != "workspace" && req.SiteSkin != "instrument" && req.SiteSkin != "folio" && req.SiteSkin != "softblock" && req.SiteSkin != "bluehour" && req.SiteSkin != "swiss" && req.SiteSkin != "ribbon" {
+		response.BadRequest(c, "site_skin must be default, editorial, fantasy, caramellatte, flexfolio, aiwork, agentory, rescale, clear, press, outline, workspace, instrument, folio, softblock, bluehour, swiss or ribbon")
 		return
 	}
 	auditReq := settingsAuditRequest(req)
@@ -1617,6 +1622,7 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		SiteName:                               req.SiteName,
 		SiteLogo:                               req.SiteLogo,
 		SiteSubtitle:                           req.SiteSubtitle,
+		SiteSkin:                               req.SiteSkin,
 		APIBaseURL:                             req.APIBaseURL,
 		ContactInfo:                            req.ContactInfo,
 		DocURL:                                 req.DocURL,
@@ -2251,6 +2257,7 @@ func (h *SettingHandler) UpdateSettings(c *gin.Context) {
 		SiteName:                                               updatedSettings.SiteName,
 		SiteLogo:                                               updatedSettings.SiteLogo,
 		SiteSubtitle:                                           updatedSettings.SiteSubtitle,
+		SiteSkin:                                               updatedSettings.SiteSkin,
 		APIBaseURL:                                             updatedSettings.APIBaseURL,
 		ContactInfo:                                            updatedSettings.ContactInfo,
 		DocURL:                                                 updatedSettings.DocURL,

@@ -212,24 +212,25 @@ type Account struct {
 	Type     string  `json:"type"`
 	// Credentials 通常经 RedactCredentials 处理后只含非敏感子键；敏感 token / 私钥的
 	// 存在性通过 CredentialsStatus（has_<key>）暴露。管理员账号详情和列表 GET 响应会额外返回 api_key。
-	Credentials             map[string]any                 `json:"credentials"`
-	CredentialsStatus       map[string]bool                `json:"credentials_status,omitempty"`
-	Extra                   map[string]any                 `json:"extra"`
-	OllamaCloudUsage        *service.OllamaCloudUsageState `json:"ollama_cloud_usage,omitempty"`
-	ProxyID                 *int64                         `json:"proxy_id"`
-	ProxyFallbackOriginID   *int64                         `json:"proxy_fallback_origin_id"`
-	ProxyFallbackOriginName *string                        `json:"proxy_fallback_origin_name,omitempty"`
-	Concurrency             int                            `json:"concurrency"`
-	LoadFactor              *int                           `json:"load_factor,omitempty"`
-	Priority                int                            `json:"priority"`
-	RateMultiplier          float64                        `json:"rate_multiplier"`
-	Status                  string                         `json:"status"`
-	ErrorMessage            string                         `json:"error_message"`
-	LastUsedAt              *time.Time                     `json:"last_used_at"`
-	ExpiresAt               *int64                         `json:"expires_at"`
-	AutoPauseOnExpired      bool                           `json:"auto_pause_on_expired"`
-	CreatedAt               time.Time                      `json:"created_at"`
-	UpdatedAt               time.Time                      `json:"updated_at"`
+	Credentials             map[string]any                    `json:"credentials"`
+	CredentialsStatus       map[string]bool                   `json:"credentials_status,omitempty"`
+	Extra                   map[string]any                    `json:"extra"`
+	OllamaCloudUsage        *service.OllamaCloudUsageState    `json:"ollama_cloud_usage,omitempty"`
+	CodexTurnTickets        []service.OpenAICodexTicketStatus `json:"codex_turn_tickets,omitempty"`
+	ProxyID                 *int64                            `json:"proxy_id"`
+	ProxyFallbackOriginID   *int64                            `json:"proxy_fallback_origin_id"`
+	ProxyFallbackOriginName *string                           `json:"proxy_fallback_origin_name,omitempty"`
+	Concurrency             int                               `json:"concurrency"`
+	LoadFactor              *int                              `json:"load_factor,omitempty"`
+	Priority                int                               `json:"priority"`
+	RateMultiplier          float64                           `json:"rate_multiplier"`
+	Status                  string                            `json:"status"`
+	ErrorMessage            string                            `json:"error_message"`
+	LastUsedAt              *time.Time                        `json:"last_used_at"`
+	ExpiresAt               *int64                            `json:"expires_at"`
+	AutoPauseOnExpired      bool                              `json:"auto_pause_on_expired"`
+	CreatedAt               time.Time                         `json:"created_at"`
+	UpdatedAt               time.Time                         `json:"updated_at"`
 
 	Schedulable bool `json:"schedulable"`
 
@@ -336,10 +337,11 @@ type AccountListItem struct {
 	Platform string  `json:"platform"`
 	Type     string  `json:"type"`
 
-	Credentials       map[string]any                 `json:"credentials,omitempty"`
-	CredentialsStatus map[string]bool                `json:"credentials_status,omitempty"`
-	Extra             map[string]any                 `json:"extra,omitempty"`
-	OllamaCloudUsage  *service.OllamaCloudUsageState `json:"ollama_cloud_usage,omitempty"`
+	Credentials       map[string]any                    `json:"credentials,omitempty"`
+	CredentialsStatus map[string]bool                   `json:"credentials_status,omitempty"`
+	Extra             map[string]any                    `json:"extra,omitempty"`
+	OllamaCloudUsage  *service.OllamaCloudUsageState    `json:"ollama_cloud_usage,omitempty"`
+	CodexTurnTickets  []service.OpenAICodexTicketStatus `json:"codex_turn_tickets,omitempty"`
 
 	ProxyID                 *int64     `json:"proxy_id"`
 	ProxyFallbackOriginID   *int64     `json:"proxy_fallback_origin_id"`

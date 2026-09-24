@@ -138,7 +138,7 @@ func TestOpenCodeGoUsageStateEmbeddedInListAndDetail(t *testing.T) {
 	now := time.Now().UTC()
 	account := &service.Account{
 		ID: 7, Name: "opencode", Platform: service.PlatformOpenAI, Type: service.AccountTypeAPIKey,
-		Credentials: map[string]any{"base_url": "https://opencode.ai/zen/go/v1", "api_key": "test-key"},
+		Credentials: map[string]any{"base_url": "https://opencode.ai/zen/go/v1", "api_key": "test-key", "refresh_token": "refresh-secret"},
 		Extra: map[string]any{
 			service.OpenCodeGoUsageAutoRefreshExtraKey: true,
 			service.OpenCodeGoUsageSnapshotExtraKey: &service.OpenCodeGoUsageSnapshot{
@@ -169,12 +169,14 @@ func TestOpenCodeGoUsageStateEmbeddedInListAndDetail(t *testing.T) {
 	var listPayload struct {
 		Data struct {
 			Items []struct {
+				Credentials     map[string]any                `json:"credentials"`
 				OpenCodeGoUsage *service.OpenCodeGoUsageState `json:"opencode_go_usage"`
 			} `json:"items"`
 		} `json:"data"`
 	}
 	require.NoError(t, json.Unmarshal(listRecorder.Body.Bytes(), &listPayload))
 	require.Len(t, listPayload.Data.Items, 1)
+	require.Equal(t, "test-key", listPayload.Data.Items[0].Credentials["api_key"])
 	require.NotNil(t, listPayload.Data.Items[0].OpenCodeGoUsage)
 	require.True(t, listPayload.Data.Items[0].OpenCodeGoUsage.AutoRefreshEnabled)
 	require.Equal(t, 6.0, listPayload.Data.Items[0].OpenCodeGoUsage.Snapshot.Data.Rolling.Percent)
@@ -184,10 +186,12 @@ func TestOpenCodeGoUsageStateEmbeddedInListAndDetail(t *testing.T) {
 	require.Equal(t, http.StatusOK, detailRecorder.Code)
 	var detailPayload struct {
 		Data struct {
+			Credentials     map[string]any                `json:"credentials"`
 			OpenCodeGoUsage *service.OpenCodeGoUsageState `json:"opencode_go_usage"`
 		} `json:"data"`
 	}
 	require.NoError(t, json.Unmarshal(detailRecorder.Body.Bytes(), &detailPayload))
+	require.Equal(t, "test-key", detailPayload.Data.Credentials["api_key"])
 	require.NotNil(t, detailPayload.Data.OpenCodeGoUsage)
 	require.Equal(t, 6.0, detailPayload.Data.OpenCodeGoUsage.Snapshot.Data.Rolling.Percent)
 
@@ -200,7 +204,9 @@ func TestOpenCodeGoUsageStateEmbeddedInListAndDetail(t *testing.T) {
 	require.NoError(t, json.Unmarshal(stateRecorder.Body.Bytes(), &statePayload))
 	require.Equal(t, statePayload.Data.Snapshot, detailPayload.Data.OpenCodeGoUsage.Snapshot)
 
+	// The fork exposes api_key in admin list/detail credentials; usage state stays redacted.
+	require.NotContains(t, stateRecorder.Body.String(), "test-key")
 	for _, body := range []string{listRecorder.Body.String(), detailRecorder.Body.String(), stateRecorder.Body.String()} {
-		require.NotContains(t, body, "test-key")
+		require.NotContains(t, body, "refresh-secret")
 	}
 }

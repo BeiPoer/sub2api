@@ -3,6 +3,7 @@ import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import { nextTick } from 'vue'
 
 import ImageGenerationView from '../ImageGenerationView.vue'
+import Select from '@/components/common/Select.vue'
 
 const {
   listKeys,
@@ -183,6 +184,31 @@ describe('ImageGenerationView image mode settings', () => {
     await buttonByText(view, '1:1 · 4K').trigger('click')
     expect(view.findAll('input[type="number"]')[0].element.value).toBe('2880')
     expect(view.findAll('input[type="number"]')[1].element.value).toBe('2880')
+  })
+
+  it('lists all Banana models and sends a selected custom model through Gemini', async () => {
+    const models = ['nano-banana-2', 'google/gemini-3-pro-image', 'gemini-2.5-pro', 'gemini-3-pro-image-preview']
+    listModels.mockResolvedValueOnce(models)
+    const view = await mountView({
+      groupId: 3,
+      settings: { gemini_image_generation_group_ids: [3] },
+      model: 'nano-banana-2'
+    })
+    await openSettings(view)
+
+    const modelSelect = view.findAllComponents(Select)[1]
+    expect(modelSelect.props('options')).toEqual(
+      [...models].sort((a, b) => a.localeCompare(b)).map((id) => ({ value: id, label: id }))
+    )
+    modelSelect.vm.$emit('update:modelValue', 'nano-banana-2')
+    await nextTick()
+    await submit(view)
+
+    expect(generateImages).toHaveBeenCalledOnce()
+    expect(generateImages.mock.calls[0][1]).toMatchObject({
+      provider: 'gemini',
+      model: 'nano-banana-2'
+    })
   })
 
   it('sends Banana resolution and aspect ratio without a pixel size', async () => {

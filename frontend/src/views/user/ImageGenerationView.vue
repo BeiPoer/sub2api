@@ -1082,10 +1082,10 @@ function isSupportedImageGenerationModelID(
   modelId: string,
   provider: ImageGenerationProvider
 ): boolean {
-  const id = modelId.toLowerCase()
   if (provider === 'gemini') {
-    return id.startsWith('gemini-') && id.includes('image')
+    return true
   }
+  const id = modelId.toLowerCase()
   return (
     id.startsWith('gpt-image-') ||
     id === 'grok-imagine' ||

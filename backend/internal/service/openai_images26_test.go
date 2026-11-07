@@ -119,7 +119,8 @@ func TestOpenAIImagesComplexityLegacyBridgeAndAPIKey(t *testing.T) {
 			if apiKey {
 				_, err = svc.ForwardImages(context.Background(), c, newOpenAIImagesAPIKeyAccount(), body, parsed, "")
 				require.NoError(t, err)
-				require.JSONEq(t, string(body), string(upstream.lastBody))
+				// The fork defaults API-key image responses to URLs while preserving native options.
+				require.JSONEq(t, `{"model":"gpt-image-1","prompt":"draw","complexity":"low","quality":"high","custom_option":{"keep":true},"response_format":"url"}`, string(upstream.lastBody))
 			} else {
 				payload, target, err := buildOpenAIImagesOAuthPayload(parsed, parsed.Model)
 				require.NoError(t, err)
@@ -184,7 +185,8 @@ func TestGPTImage26NativeOptions(t *testing.T) {
 		upstream := &httpUpstreamRecorder{resp: openAIImagesJSONResponse()}
 		_, err = newOpenAIImagesTestService(upstream).ForwardImages(context.Background(), c, newOpenAIImagesAPIKeyAccount(), body, parsed, "")
 		require.NoError(t, err)
-		require.JSONEq(t, string(body), string(upstream.lastBody), "API-key requests must retain the original options")
+		expected := `{"model":"gpt-image-2.6-sunburst","prompt":"draw","response_format":"url",` + options + `}`
+		require.JSONEq(t, expected, string(upstream.lastBody), "API-key requests must retain the original options and default to URL responses")
 	}
 	for _, multipartInput := range []bool{false, true} {
 		t.Run(fmt.Sprintf("markup/multipart=%t", multipartInput), func(t *testing.T) {
